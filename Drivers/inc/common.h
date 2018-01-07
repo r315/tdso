@@ -10,7 +10,7 @@
 #ifndef _common_h_
 #define _common_h_
 
-#if defined(__TDO__)
+#if defined(__TDSO__)
 #if defined(USE_HAL_DRIVER)
 	#include "stm32f1xx_hal.h"
 	#define DelayMs(x) HAL_Delay(x)

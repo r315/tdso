@@ -93,7 +93,7 @@
             GPIO_SetOutput(LCD_RST);    \
             GPIO_SetOutput(LCD_BKL);    \
 
-#elif defined(__TDO__) && defined(USE_HAL_DRIVER)
+#elif defined(__TDSO__) && defined(USE_HAL_DRIVER)
 /**
 * @brief Lcd Pin configuration:
 *       PA4  CS

@@ -12,7 +12,7 @@
 
 #include <stdint.h>
 
-#if defined(__TDO__)
+#if defined(__TDSO__)
 
 #if defined(USE_HAL_DRIVER)
 #include "stm32f1xx_hal.h"

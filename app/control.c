@@ -10,7 +10,7 @@
 #include "control.h"
 #include "tdso_util.h"
 
-#if defined(__TDO__)
+#if defined(__TDSO__)
 static const uint16_t sbitmap[] = {
 		/*(CONTROL_SWITCH_SCALE(SCALE_001) | CONTROL_SWITCH_MULTIPLIER(MULT_1)), // 10mV
 		(CONTROL_SWITCH_SCALE(SCALE_001) | CONTROL_SWITCH_MULTIPLIER(MULT_2)), // 20mV

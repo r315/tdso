@@ -30,7 +30,7 @@
 }
 
 
-#elif defined(__TDO__)
+#elif defined(__TDSO__)
 /* Led is connected on PB3 in common anode configuration */
 /* jag option must be disable to use PB3 as GPIO*/
 #define LED_Init() // Handle by HAL init

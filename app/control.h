@@ -8,7 +8,7 @@
 #ifndef CONTROL_H_
 #define CONTROL_H_
 
-#if defined(__TDO__)
+#if defined(__TDSO__)
 enum {
 	NO0 = 1,
 	NO1,

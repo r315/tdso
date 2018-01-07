@@ -3,7 +3,7 @@
 
 #if defined(__EMU__)
 	#include <lcdsdl.h>
-#elif defined(__LPCXpresso__) || defined(__TDO__)
+#elif defined(__LPCXpresso__) || defined(__TDSO__)
     #include "ili9341.h"
 #elif defined(__BLUEBOARD__)
     #include "ili9328.h"

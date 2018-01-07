@@ -14,7 +14,7 @@
 #include <stdint.h>
 #include "common.h"
 
-#if defined(__TDO__)
+#if defined(__TDSO__)
 #include <stm32f103xb.h>
 
 #define GPIO_Set(port, pinmask) port->BSRR = pinmask

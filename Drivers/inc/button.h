@@ -62,7 +62,7 @@ enum Benvent{
 
 #define BUTTON_MASK (BUTTON_UP | BUTTON_DOWN | BUTTON_LEFT | BUTTON_RIGHT | BUTTON_A )
 
-#elif defined(__TDO__)
+#elif defined(__TDSO__)
 	#define BUTTON_LEFT  	(1<<15)
 	#define BUTTON_RIGHT 	(1<<13)
 	#define BUTTON_CENTER	(1<<14)
