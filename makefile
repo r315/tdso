@@ -3,12 +3,16 @@
 #########################################################
 TARGET =tdso
 PRJPATH =.
-CSRCPATH =Src app Drivers/STM32F1xx_HAL_Driver/Src Drivers/button Drivers/display Middlewares/ST/STM32_USB_Device_Library/Core/Src Middlewares/ST/STM32_USB_Device_Library/Class/DFU/Src
+OBJPATH =obj
+
+CSRCPATH =Src app Drivers/STM32F1xx_HAL_Driver/Src Drivers/button Drivers/display \
+Middlewares/ST/STM32_USB_Device_Library/Core/Src Middlewares/ST/STM32_USB_Device_Library/Class/DFU/Src
+
 INCSPATH =Inc Src app Drivers/inc Middlewares/ST/STM32_USB_Device_Library/Class/DFU/Inc \
 Drivers/inc Drivers/STM32F1xx_HAL_Driver/Inc \
 Drivers/CMSIS/Device/ST/STM32F1xx/Include \
 Drivers/CMSIS/Include Middlewares/ST/STM32_USB_Device_Library/Core/Inc
-OBJPATH =obj
+
 CSRCS =main.c \
 stm32f1xx_it.c \
 stm32f1xx_hal_pcd.c \
@@ -122,6 +126,14 @@ $(TARGET).jlink:
 	
 flash: $(TARGET).jlink #tdso.bin #$(TARGET).bin
 	$(JLINK) -device $(DEVICE) -if SWD -speed auto -CommanderScript $(TARGET).jlink
+
+$(TARGET).cfg:
+	@echo "Creating opencod configuration file"
+	echo "interface jlink\ntransport select swd\nsource [find target/stm32f1x.cfg]\nadapter_khz 4000" > $(TARGET).cfg
+
+program: $(TARGET).axf $(TARGET).cfg
+	openocd -f $(TARGET).cfg -c "program $(TARGET).axf verify reset exit"
+
 
 $(OBJPATH)/%.o : %.c
 	@echo "---- Compile" $< "---->" $@
