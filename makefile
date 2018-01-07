@@ -47,7 +47,7 @@ softpower.c \
 tests.c \
 tdso_main.c \
 tdso_util.c
-GCSYMBOLS =-D__TDO__ -DSTM32F103xB -DUSE_HAL_DRIVER -D__weak='__attribute__((weak))'
+GCSYMBOLS =-D__TDO__ -DSTM32F103xB -DUSE_HAL_DRIVER -D__weak='__attribute__((weak))' -D__packet='__attribute__((__packed__))'
 #########################################################
 # TOOLCHAIN
 #########################################################
@@ -69,9 +69,9 @@ BSPPATH   =startup
 INCSPATH +=
 LIBSPATH +=lib
 DEVICE  =STM32F103C8
-GCFLAGS =-mcpu=cortex-m3 -mthumb -mfloat-abi=soft -Os -Wall -fmessage-length=0 -ffunction-sections -fmessage-length=0
+GCFLAGS =-mcpu=cortex-m3 -mthumb -mfloat-abi=soft -Og -g3 -Wall -fmessage-length=0 -ffunction-sections -fmessage-length=0
 #GCFLAGS =-O3 -mcpu=cortex-m3 -mthumb -Wall -g
-LDFLAGS =-mcpu=cortex-m3 -mthumb -mfloat-abi=soft
+LDFLAGS =-mcpu=cortex-m3 -mthumb -mfloat-abi=soft -Wl,--gc-sections
 LIBS =-nostdlib #-lgcc -lc -lnosys
 CSRCS   +=system_stm32f1xx.c
 ASRCS   +=startup_stm32f103xb.s

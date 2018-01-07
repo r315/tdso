@@ -1,3 +1,5 @@
 .cproject
 .mxproject
 .project
+obj/
+test/
