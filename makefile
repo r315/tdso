@@ -5,11 +5,13 @@ TARGET =tdso
 PRJPATH =.
 OBJPATH =obj
 
-CSRCPATH =Src app Drivers/STM32F1xx_HAL_Driver/Src Drivers/button Drivers/display \
+CSRCPATH =Src app Drivers/STM32F1xx_HAL_Driver/Src Drivers/interface/src \
 Middlewares/ST/STM32_USB_Device_Library/Core/Src Middlewares/ST/STM32_USB_Device_Library/Class/DFU/Src
 
-INCSPATH =Inc Src app Drivers/inc Middlewares/ST/STM32_USB_Device_Library/Class/DFU/Inc \
+INCSPATH =Inc Src app \
+Drivers/interface/inc \
 Drivers/inc Drivers/STM32F1xx_HAL_Driver/Inc \
+Middlewares/ST/STM32_USB_Device_Library/Class/DFU/Inc \
 Drivers/CMSIS/Device/ST/STM32F1xx/Include \
 Drivers/CMSIS/Include Middlewares/ST/STM32_USB_Device_Library/Core/Inc
 
@@ -51,7 +53,7 @@ softpower.c \
 tests.c \
 tdso_main.c \
 tdso_util.c
-GCSYMBOLS =-D__TDO__ -DSTM32F103xB -DUSE_HAL_DRIVER -D__weak='__attribute__((weak))' -D__packet='__attribute__((__packed__))'
+GCSYMBOLS =-D__TDSO__ -DSTM32F103xB -DUSE_HAL_DRIVER -D__weak='__attribute__((weak))' -D__packet='__attribute__((__packed__))'
 #########################################################
 # TOOLCHAIN
 #########################################################
@@ -73,7 +75,7 @@ BSPPATH   =startup
 INCSPATH +=
 LIBSPATH +=lib
 DEVICE  =STM32F103C8
-GCFLAGS =-mcpu=cortex-m3 -mthumb -mfloat-abi=soft -Og -g3 -Wall -fmessage-length=0 -ffunction-sections -fmessage-length=0
+GCFLAGS =-mcpu=cortex-m3 -mthumb -mfloat-abi=soft -Og -g3 -Wall -fmessage-length=0 -ffunction-sections
 #GCFLAGS =-O3 -mcpu=cortex-m3 -mthumb -Wall -g
 LDFLAGS =-mcpu=cortex-m3 -mthumb -mfloat-abi=soft -Wl,--gc-sections
 LIBS =-nostdlib #-lgcc -lc -lnosys

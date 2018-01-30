@@ -7,6 +7,7 @@
 #include "tdso_util.h"
 #include "capture.h"
 #include "control.h"
+#include "softpower.h"
 
 int16_t screenwave[DSO_GRID_W];
 
@@ -846,6 +847,8 @@ uint32_t btn;
 		}
 
 		if(SOFTPOWER_Pressed()){
+			LCD_Clear(BLACK);
+			DISPLAY_SetColors(WHITE, BLACK);
 		    DISPLAY_Text(20,20, "Shuting Down!");
 		    DelayMs(2000);
 		    SOFTPOWER_PowerOff();
