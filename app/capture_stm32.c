@@ -73,7 +73,6 @@ void DMA1_Channel1_IRQHandler(void){
 #define TIMxCCMR1_OC2M_PWM_M2        (7<<12)
 #define TIMxCCMR1_OC2CE              (1<<15)
 
-
 void CAP_Init(void){
     /* Configure DMA Channel1*/
     RCC->AHBENR |= RCC_AHBENR_DMA1EN;           // Enable DMA1
