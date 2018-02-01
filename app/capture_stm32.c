@@ -37,6 +37,42 @@ void DMA1_Channel1_IRQHandler(void){
 /**
  *
  * */
+#define TIMxCCMR1_CC1S_TI1 (1<<0)
+#define TIMxCCMR1_CC1S_TI2 (2<<0)
+#define TIMxCCMR1_CC1S_TRC (3<<0)
+
+#define TIMxCCMR1_CC2S_TI1 (1<<8)
+#define TIMxCCMR1_CC2S_TI2 (2<<8)
+#define TIMxCCMR1_CC2S_TRC (3<<8)
+
+// Input mode bits
+#define TIMxCCMR1_IC1PSC_2E (1<<2)
+#define TIMxCCMR1_IC1PSC_4E (2<<2)
+#define TIMxCCMR1_IC1PSC_8E (3<<2)
+
+#define TIMxCCMR1_IC2PSC_2E (1<<10)
+#define TIMxCCMR1_IC2PSC_4E (2<<10)
+#define TIMxCCMR1_IC2PSC_8E (3<<10)
+
+// Output mode bits
+#define TIMxCCMR1_OC1FE              (1<<2)
+#define TIMxCCMR1_OC1PE              (1<<3)
+#define TIMxCCMR1_OC1M_OC1REF_HIGH   (1<<4)
+#define TIMxCCMR1_OC1M_OC1REF_LOW    (2<<4)
+#define TIMxCCMR1_OC1M_OC1REF_TOGGLE (3<<4)
+#define TIMxCCMR1_OC1M_PWM_M1        (6<<4)
+#define TIMxCCMR1_OC1M_PWM_M2        (7<<4)
+#define TIMxCCMR1_OC1CE              (1<<7)
+
+#define TIMxCCMR1_OC2FE              (1<<10)
+#define TIMxCCMR1_OC2PE              (1<<11)
+#define TIMxCCMR1_OC2M_OC2REF_HIGH   (1<<12)
+#define TIMxCCMR1_OC2M_OC2REF_LOW    (2<<12)
+#define TIMxCCMR1_OC2M_OC2REF_TOGGLE (3<<12)
+#define TIMxCCMR1_OC2M_PWM_M1        (6<<12)
+#define TIMxCCMR1_OC2M_PWM_M2        (7<<12)
+#define TIMxCCMR1_OC2CE              (1<<15)
+
 
 void CAP_Init(void){
     /* Configure DMA Channel1*/
@@ -52,7 +88,7 @@ void CAP_Init(void){
 
     /* Configure Timer 4 */
     RCC->APB1ENR  |= RCC_APB1ENR_TIM4EN;    // Enable Timer 4
-    RCC->APB1RSTR |= RCC_APB1ENR_TIM4EN;
+    RCC->APB1RSTR |= RCC_APB1ENR_TIM4EN;    // Reset timer registers
     RCC->APB1RSTR &= ~RCC_APB1ENR_TIM4EN;
 
     TIM4->CR2 = (7<<TIM_CR2_MMS_Pos);       // OC4REF signal is used as trigger output (TRGO)
@@ -89,7 +125,7 @@ void CAP_Init(void){
             (3<<TIM_SMCR_TS_Pos) |          // Internal Trigger 3 (TIM4_TRGO)
             (7<<TIM_SMCR_SMS_Pos);          // External clock mode 1
     TIM1->PSC = 1;                          // We want to count TIM4 events
-    TIM1->CCMR1 = (1<<TIM_CCMR1_OC1M_Pos) |(1<<TIM_CCMR1_OC2M_Pos);         // Capture to CCR1 on TI1, Interrupt on Match with CCR2
+    TIM1->CCMR1 =  TIMxCCMR1_OC2M_OC2REF_HIGH | TIMxCCMR1_CC1S_TI1;      // Capture to CCR1 on TI1, Interrupt on Match with CCR2
     TIM1->DIER = TIM_DIER_CC1IE | TIM_DIER_CC2IE;            // Enable capture interrupt
     TIM1->ARR   = 0xFFFF;                   // allow max count for capture
 
