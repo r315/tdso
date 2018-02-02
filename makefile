@@ -53,7 +53,7 @@ softpower.c \
 tests.c \
 tdso_main.c \
 tdso_util.c
-GCSYMBOLS =-D__TDSO__ -DSTM32F103xB -DUSE_HAL_DRIVER -D__weak='__attribute__((weak))' -D__packet='__attribute__((__packed__))'
+GCSYMBOLS =__TDSO__ STM32F103xB USE_HAL_DRIVER __weak='__attribute__((weak))' __packet='__attribute__((__packed__))' LCD_DMA
 #########################################################
 # TOOLCHAIN
 #########################################################
@@ -139,7 +139,7 @@ program: $(TARGET).axf $(TARGET).cfg
 
 $(OBJPATH)/%.o : %.c
 	@echo "---- Compile" $< "---->" $@
-	$(GCC) $(GCFLAGS) $(addprefix -I, $(INCSPATH)) $(GCSYMBOLS) -c $< -o $@
+	$(GCC) $(GCFLAGS) $(addprefix -I, $(INCSPATH)) $(addprefix -D, $(GCSYMBOLS))  -c $< -o $@
 	
 $(OBJPATH)/%.o : %.s
 	@echo "---- Assemble" $< "---->" $@

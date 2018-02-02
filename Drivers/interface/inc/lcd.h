@@ -22,6 +22,10 @@
     #define RGB(r,g,b)  (int)((r<<11) | (g<<5) | b)
 #endif
 
+#if defined(LCD_DMA)
+void LCD_DMA_XFER(uint16_t *buf, uint32_t size, uint8_t fill);
+#endif
+
 //-------------------------------------------------------------------
 //	basic colors 
 //			16bit

@@ -40,11 +40,13 @@ void LCD_Fill(uint32_t n, uint16_t data){
 #ifdef SPI_16XFER
     while(n--)        
         SPI_Send16(data);
+#elif defined(LCD_DMA)
+    LCD_DMA_XFER(&data, n, 1);
 #else
-    while(n--){
-        SPI_Send(data>>8);
-        SPI_Send(data);        
-    }
+	while(n--){
+		SPI_Send(data>>8);
+		SPI_Send(data);
+	}
 #endif
     LCD_CS1;
 }
