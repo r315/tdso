@@ -151,44 +151,51 @@ uint16_t dy;
         //vertical grid rule
         while(p1 <= p2 ){
             if(((p1 % DSO_GRID_DOT_SPACE) == 0) || 
-                ( ((p1 == -1) || (p1 == 1)) && (index != ((DSO_GRID_W/2) -1)) && (index != ((DSO_GRID_W/2)) +1) )) 
+                ( ((p1 == -1) || (p1 == 1)) && (index != ((DSO_GRID_W/2) -1)) && (index != ((DSO_GRID_W/2)) +1) )){
 				#if defined(__TDSO__)
+                SPI_Send(DSO_GRID_COLOR>>8);
                 SPI_Send(DSO_GRID_COLOR);
 				#else
 				LCD_Data(DSO_GRID_COLOR);
 				#endif
-             else
+            }else{
 				#if defined(__TDSO__)
-                SPI_Send(BLACK);
+            	SPI_Send(BLACK>>8);
+            	SPI_Send(BLACK);
 				#else
 				LCD_Data(BLACK);
 				#endif
-             p1++;
+            }
+            p1++;
         }
     }else{
         if( ((index % DSO_GRID_DOT_SPACE) == 0) ){
             //horizontal grid rule
             while(p1 <= p2 ){
                 if(((p1 % (DSO_GRID_H / DSO_GRID_V_DIVISIONS)) == 0) ||
-                     (p1 == -1) || (p1 == 1))
+                     (p1 == -1) || (p1 == 1)){
 					#if defined(__TDSO__)
-					SPI_Send(DSO_GRID_COLOR);
+                	SPI_Send(DSO_GRID_COLOR>>8);
+                	SPI_Send(DSO_GRID_COLOR);
 					#else
 					LCD_Data(DSO_GRID_COLOR);
 					#endif
-                else
+                }else{
 					#if defined(__TDSO__)
-					SPI_Send(BLACK);
+                	SPI_Send(BLACK>>8);
+                	SPI_Send(BLACK);
 					#else
 					LCD_Data(BLACK);
 					#endif
+                }
                 p1++;
             }
         }else{
             // no grid rule
             while(p1 <= p2 ){
 				#if defined(__TDSO__)
-				SPI_Send(BLACK);
+            	SPI_Send(BLACK>>8);
+            	SPI_Send(BLACK);
 				#else
 				LCD_Data(BLACK);
 				#endif
@@ -197,7 +204,7 @@ uint16_t dy;
         }
     }
 	#if defined(__TDSO__)
-    LCD_CS0;
+    LCD_CS1;
 	#endif
 }
 
@@ -780,7 +787,7 @@ void DSO_Init(void){
     dso.hpos = 0;
     DSO_DrawHpos(DSO_HPOS_W/2);
 
-    dso.timebase = TB_1MS_IDX;
+    dso.timebase = TB_1MS_IDX - 3;
     DSO_DrawTimeBase(&dso);
     
     dso.trigger.index = (DSO_GRID_W / 2);
