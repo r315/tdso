@@ -12,6 +12,7 @@
 
 #include <gpio.h>
 #include <stdint.h>
+#include <spi.h>
 
 #define LCD_ILI9341
 
@@ -171,6 +172,14 @@
 *         para definir uma zona para escrita
 **/
 void LCD_Fill(uint32_t n, uint16_t color);
+
+/**
+* @brief Efectua a copia de uma zona de memoria para o
+*  	display
+*   Nota: LCD_Window deve de ser chamado previamente
+*         para definir uma zona para escrita
+**/
+void LCD_Fill_Data(uint32_t n, uint16_t *data);
 
 /**
  * @brief efectua deslocamento vertical

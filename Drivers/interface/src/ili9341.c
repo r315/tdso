@@ -35,17 +35,32 @@ void LCD_Scroll(uint16_t sc){
     LCD_CS1;
 }
 
-void LCD_Fill(uint32_t n, uint16_t data){
+void LCD_Fill(uint32_t n, uint16_t color){
+	if(!n) return;
     LCD_CS0;
 #ifdef SPI_16XFER
-    while(n--)        
-        SPI_Send16(data);
+    while(n--)
+        SPI_Send16(color);
 #elif defined(LCD_DMA)
-    LCD_DMA_XFER(&data, n, 1);
+    LCD_Fill_DMA(n, color);
 #else
 	while(n--){
-		SPI_Send(data>>8);
-		SPI_Send(data);
+		SPI_Send(color>>8);
+		SPI_Send(color);
+	}
+#endif
+    LCD_CS1;
+}
+
+void LCD_Fill_Data(uint32_t n, uint16_t *data){
+	if(!n) return;
+    LCD_CS0;
+#if !defined(LCD_DMA)
+    LCD_Fill_Data_DMA(n, data);
+#else
+	while(n--){
+		SPI_Send((*data)>>8);
+		SPI_Send(*(data++));
 	}
 #endif
     LCD_CS1;
@@ -80,6 +95,9 @@ void LCD_Pixel(uint16_t x, uint16_t y, uint16_t c){
     SPI_Send16(y);
 
     LCD_Command(RAMWR);
+#elif defined(LCD_DMA)
+    LCD_Window(x,y,1,1);
+    LCD_Data(c);
 #else
     LCD_Command(CASET);
     SPI_Send(x>>8);
@@ -111,7 +129,18 @@ void LCD_Window(uint16_t x, uint16_t y, uint16_t w, uint16_t h){
     SPI_Send16(y);
     SPI_Send16(y + h - 1);
 
-    LCD_Command(RAMWR);    
+    LCD_Command(RAMWR);
+#elif defined(LCD_DMA)
+uint16_t data [2];
+	data[0] = x;
+	data[1] = x + ( w - 1 );
+	LCD_Command(CASET);
+	LCD_Fill_Data_DMA(sizeof(data)/sizeof(uint16_t), data);
+	data[0] = y;
+	data[1] = y + ( h - 1 );
+	LCD_Command(PASET);
+	LCD_Fill_Data_DMA(sizeof(data)/sizeof(uint16_t), data);
+	LCD_Command(RAMWR);
 #else
     LCD_Command(CASET);
     SPI_Send(x>>8);
