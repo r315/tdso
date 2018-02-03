@@ -142,6 +142,9 @@ uint16_t dy;
     p2 = (p2 >  (DSO_GRID_H/2)) ? (DSO_GRID_H/2) : p2;
     
     LCD_Window(index + DSO_GRID_ORIGIN_X, p1 + DSO_GRID_CENTER, 1, (dy > 0) ? dy + 1 :1);
+	#if defined(__TDSO__)
+    LCD_CS0;
+	#endif
     
     if( ((index % (DSO_GRID_W / DSO_GRID_H_DIVISIONS)) == 0) ||
             index == ((DSO_GRID_W /2) - 1) || index == ((DSO_GRID_W /2) + 1)){  
@@ -149,9 +152,17 @@ uint16_t dy;
         while(p1 <= p2 ){
             if(((p1 % DSO_GRID_DOT_SPACE) == 0) || 
                 ( ((p1 == -1) || (p1 == 1)) && (index != ((DSO_GRID_W/2) -1)) && (index != ((DSO_GRID_W/2)) +1) )) 
-                LCD_Data(CYAN);//DSO_GRID_COLOR);
+				#if defined(__TDSO__)
+                SPI_Send(DSO_GRID_COLOR);
+				#else
+				LCD_Data(DSO_GRID_COLOR);
+				#endif
              else
-                LCD_Data(BLACK);
+				#if defined(__TDSO__)
+                SPI_Send(BLACK);
+				#else
+				LCD_Data(BLACK);
+				#endif
              p1++;
         }
     }else{
@@ -160,20 +171,34 @@ uint16_t dy;
             while(p1 <= p2 ){
                 if(((p1 % (DSO_GRID_H / DSO_GRID_V_DIVISIONS)) == 0) ||
                      (p1 == -1) || (p1 == 1))
-                    LCD_Data(CYAN);//DSO_GRID_COLOR);
+					#if defined(__TDSO__)
+					SPI_Send(DSO_GRID_COLOR);
+					#else
+					LCD_Data(DSO_GRID_COLOR);
+					#endif
                 else
-                    LCD_Data(BLACK);
+					#if defined(__TDSO__)
+					SPI_Send(BLACK);
+					#else
+					LCD_Data(BLACK);
+					#endif
                 p1++;
             }
         }else{
             // no grid rule
             while(p1 <= p2 ){
-                LCD_Data(BLACK);
+				#if defined(__TDSO__)
+				SPI_Send(BLACK);
+				#else
+				LCD_Data(BLACK);
+				#endif
                 p1++;
             }
         }
     }
-    
+	#if defined(__TDSO__)
+    LCD_CS0;
+	#endif
 }
 
 void DSO_DrawGridHline(uint16_t y){
