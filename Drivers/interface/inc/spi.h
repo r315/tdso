@@ -21,11 +21,16 @@ extern SPI_HandleTypeDef hspi1;
 
 #define SPI_Init()    // Handle By HAL_Init
 
+#if defined(LCD_DMA)
+#define SPI_Send(x) SPI_Send_DMA(x)
+
+#else
 #define SPI_Send(x)                    \
 {                                      \
 	uint8_t _data = x;                  \
-HAL_SPI_Transmit(&hspi1, &_data, 1, 10);\
+HAL_SPI_Transmit(&hspi1, &(x), 1, 10);\
 }
+#endif
 
 #else /* USE_HAL_DRIVER */
 
