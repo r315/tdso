@@ -44,59 +44,101 @@ void TEST_Run(void);
 #define DMA_CCR_PSIZE_16    (1<<8)
 #define DMA_CCR_PSIZE_8     (0<<8)
 
+void LCD_DMA_XFER(uint32_t count, uint16_t *data, uint8_t isbuf){
+	GPIOB->BRR = (1<<9);
 
-void LCD_DMA_XFER(uint16_t *buf, uint32_t size, uint8_t fill){
+    DMA1_Channel3->CMAR = (uint32_t)data;
+    DMA1_Channel3->CCR =
+       		DMA_CCR_PL_Medium |   // priority
+   			DMA_CCR_MSIZE_16  |   // 16bit src size
+   			DMA_CCR_PSIZE_16  |   // 16bit dst size
+   			DMA_CCR_DIR       ;   // Read from Memory
 
-    DMA1_Channel3->CMAR = (uint32_t)buf;
+    if(isbuf){
+    	 DMA1_Channel3->CCR |= DMA_CCR_MINC;
+    }
+
+    // Configure Spi for 16bit DMA
+   	SPI1->CR1 &= ~SPI_CR1_SPE;
     SPI1->CR2 |= SPI_CR2_TXDMAEN;
+    SPI1->CR1 |= SPI_CR1_DFF | SPI_CR1_SPE;
 
-    if(fill){
-    	DMA1_Channel3->CCR &= ~DMA_CCR_MINC;
-    }
-    else{
-    	DMA1_Channel3->CCR |= DMA_CCR_MINC;
-    }
-
-    size <<= 1;
-
-    while(size > 0x10000){
+    // DMA only supports transfers of 65536
+    while(count > 0x10000){
     	DMA1_Channel3->CNDTR = 0xFFFF;
     	DMA1_Channel3->CCR |= DMA_CCR_EN;
-    	 while((DMA1->ISR & DMA_ISR_TCIF3)){
-    	    	DMA1->IFCR = DMA_IFCR_CGIF3;
+    	 while(!(DMA1->ISR & DMA_ISR_TCIF3)){
     	    }
+    	DMA1->IFCR = DMA_IFCR_CGIF3;
 
     	 DMA1_Channel3->CCR &= ~DMA_CCR_EN;
-    	 size -= 0x10000;
+    	 count -= 0x10000;
     }
 
-    DMA1_Channel3->CNDTR = size;
-    DMA1_Channel3->CCR |= DMA_CCR_EN;
+    // Send the remaining
+    if(count){
+		DMA1_Channel3->CNDTR = count;
+		DMA1_Channel3->CCR |= DMA_CCR_EN;
 
-	 while((DMA1->ISR & DMA_ISR_TCIF3)){
-			DMA1->IFCR = DMA_IFCR_CGIF3;
-		}
+		while((DMA1->ISR & DMA_ISR_TCIF3) == 0 );
 
-	DMA1_Channel3->CCR &= ~DMA_CCR_EN;
-    SPI1->CR2 &= ~SPI_CR2_TXDMAEN;
+		DMA1->IFCR = DMA_IFCR_CGIF3;
+		//DMA1_Channel3->CCR &= ~DMA_CCR_EN;
+		 DMA1_Channel3->CCR =
+		    		DMA_CCR_PL_Medium |
+					DMA_CCR_MSIZE_8  |
+					DMA_CCR_PSIZE_8  |
+					DMA_CCR_DIR;
+
+		// wait for last transfer
+		while((SPI1->SR & SPI_SR_TXE) == 0 );
+		while((SPI1->SR & SPI_SR_BSY) != 0 );
+    }
+
+    // Restore 8bit Spi
+	SPI1->CR1 &= ~(SPI_CR1_SPE | SPI_CR1_DFF);
+	SPI1->CR2 = 0;
+	SPI1->CR1 |= SPI_CR1_SPE;
+
+	GPIOB->BSRR = (1<<9);
 }
 
 
+void LCD_Fill_DMA(uint32_t count, uint16_t color){
+	LCD_DMA_XFER(count, &color, OFF);
+}
+
+
+void LCD_Fill_Data_DMA(uint32_t count, uint16_t *data){
+	LCD_DMA_XFER(count, data, ON);
+}
+
+void SPI_Send_DMA(uint8_t data){
+	SPI1->DR = data;
+	while((SPI1->SR & SPI_SR_TXE) == 0 );
+	while((SPI1->SR & SPI_SR_BSY) != 0 );
+
+}
+
 
 void tdo_main(void){
+
+	SPI1->CR1 |= SPI_CR1_SPE;
+	SPI_Send_DMA(0xFF);
 
     LCD_Init();
     LCD_Bkl(ON);
 
     DMA1_Channel3->CPAR = (uint32_t)&SPI1->DR;
-    DMA1_Channel3->CCR =
-    		DMA_CCR_PL_Medium |   // priority
-			DMA_CCR_MSIZE_16  |   // 16bit src size
-			DMA_CCR_PSIZE_8   |   // 8bit dst size
-			DMA_CCR_DIR       ;   // Read from Memory
+    DMA1_Channel3->CCR = DMA_CCR_PL_Medium |
+    					 DMA_CCR_MSIZE_8  |
+    					 DMA_CCR_PSIZE_8  |
+    					 DMA_CCR_DIR;
+
 
     //LCD_Clear(RED);
-    LCD_Clear(0x00F8);
+    GPIOB->BSRR = (1<<9);
+    //LCD_Clear(0x00F8);
     BUTTON_Read();
 
     if(BUTTON_GetEvents() == BUTTON_PRESSED && BUTTON_GetValue() == BUTTON_CENTER){
