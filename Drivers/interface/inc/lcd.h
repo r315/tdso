@@ -23,7 +23,9 @@
 #endif
 
 #if defined(LCD_DMA)
-void LCD_DMA_XFER(uint16_t *buf, uint32_t size, uint8_t fill);
+void LCD_Fill_DMA(uint32_t count, uint16_t color);
+void LCD_Fill_Data_DMA(uint32_t count, uint16_t *data);
+void SPI_Send_DMA(uint8_t data);
 #endif
 
 //-------------------------------------------------------------------
@@ -92,6 +94,16 @@ void LCD_Pixel(uint16_t x, uint16_t y, uint16_t color);
  @brief Draws a line
  **/
 void LCD_Line(uint16_t x1, uint16_t y1,  uint16_t x2, uint16_t y2, uint16_t color);
+
+/**
+ @brief Draws a Horizontal line
+ **/
+void LCD_Line_H(uint16_t x1, uint16_t x2, uint16_t y, uint16_t color);
+
+/**
+ @brief Draws a Vertical line
+ **/
+void LCD_Line_V(uint16_t x, uint16_t y1, uint16_t y2, uint16_t color);
 
 /**
  @brief 

@@ -42,12 +42,48 @@ void LCD_Rect(uint16_t x, uint16_t y,  uint16_t w, uint16_t h, uint16_t color){
 /**
  * 
  **/ 
+void LCD_Line_H(uint16_t x1, uint16_t x2, uint16_t y, uint16_t color){
+	if (x1 < x2){
+		LCD_Window(x1, y, x2 - x1, 1 );
+		LCD_Fill(x2 - x1, color);
+	}else{
+		LCD_Window(x2, y, x1 - x2, 1 );
+		LCD_Fill(x1 - x2, color);
+	}
+}
+
+/**
+ *
+ **/
+void LCD_Line_V(uint16_t x, uint16_t y1, uint16_t y2, uint16_t color){
+	if (y1 < y2){
+		LCD_Window(x, y1, 1, y2- y1);
+		LCD_Fill(y2 - y1, color);
+	}else{
+		LCD_Window(x, y2, 1, y1 - y2 );
+		LCD_Fill(y1 - y2, color);
+	}
+}
+
+/**
+ *
+ **/
 void LCD_Line(uint16_t x1, uint16_t y1,  uint16_t x2, uint16_t y2, uint16_t color){
 {
     signed int dy = y2 - y1;
     signed int dx = x2 - x1;
     signed int stepx, stepy;
     signed int fraction;
+
+    if ( x1 == x2 ){
+    	LCD_Line_V(x1,y1, y2, color);
+    	return;
+    }
+
+    if ( y1 == y2 ){
+		LCD_Line_H(x1, x2, y1, color);
+		return;
+    }
 
     if (dy < 0) { dy = -dy;  stepy = -1; } else { stepy = 1; }
     if (dx < 0) { dx = -dx;  stepx = -1; } else { stepx = 1; }
