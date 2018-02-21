@@ -7,7 +7,7 @@ SRCPATH =../interface/src src
 OBJS =emulatorTest.o font8x16.o lcdsdl.o emulator.o #lcd.c
 #####################################################
 LIBTARGET =emu
-LIBTARGETPATH ="."
+LIBTARGETPATH ="../../"
 LIBOBJS =lcdsdl.o emulator.o lcd.o fonts.o display.o
 #####################################################
 VPATH +=$(SRCPATH)
