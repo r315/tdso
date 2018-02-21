@@ -39,6 +39,11 @@
 #define LED_ON  HAL_GPIO_WritePin(GPIOB, LED , GPIO_PIN_RESET)
 #define LED_OFF HAL_GPIO_WritePin(GPIOB, LED , GPIO_PIN_SET)
 
+#define LED1 GPIO_PIN_13
+#define LED1_ON HAL_GPIO_WritePin(GPIOC, LED1 , GPIO_PIN_RESET)
+#define LED1_OFF HAL_GPIO_WritePin(GPIOC, LED1 , GPIO_PIN_SET)
+
+
 #else
 #error "Define board"
 #endif  /* Board selection */
