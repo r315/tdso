@@ -127,7 +127,6 @@ void tdo_main(void){
 	SPI_Send_DMA(0xFF);
 
     LCD_Init();
-    LCD_Bkl(ON);
 
     DMA1_Channel3->CPAR = (uint32_t)&SPI1->DR;
     DMA1_Channel3->CCR = DMA_CCR_PL_Medium |
@@ -136,9 +135,9 @@ void tdo_main(void){
     					 DMA_CCR_DIR;
 
 
-    //LCD_Clear(RED);
-    GPIOB->BSRR = (1<<9);
-    //LCD_Clear(0x00F8);
+    LCD_Clear(BLACK);
+    //GPIOB->BSRR = (1<<9);
+
     BUTTON_Read();
 
     if(BUTTON_GetEvents() == BUTTON_PRESSED && BUTTON_GetValue() == BUTTON_CENTER){

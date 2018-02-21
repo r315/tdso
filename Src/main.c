@@ -339,7 +339,7 @@ static void MX_SPI1_Init(void)
   //hspi1.Init.CLKPolarity = SPI_POLARITY_HIGH;
   //hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
   hspi1.Init.NSS = SPI_NSS_SOFT;
-  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_64;
+  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_16;
   hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
   hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
@@ -537,6 +537,7 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOD_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
+  __HAL_RCC_GPIOC_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(LCD_CS_GPIO_Port, LCD_CS_Pin, GPIO_PIN_RESET);
@@ -548,7 +549,7 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin : LCD_CS_Pin */
   GPIO_InitStruct.Pin = LCD_CS_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_MEDIUM;
   HAL_GPIO_Init(LCD_CS_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : LCD_RST_Pin LCD_CD_Pin LCD_LED_Pin LED_Pin 
@@ -556,7 +557,7 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pin = LCD_RST_Pin|LCD_CD_Pin|LCD_LED_Pin|LED_Pin 
                           |SCALE0_Pin|SCALE1_Pin|MUL0_Pin|MUL1_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_MEDIUM;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /*Configure GPIO pins : T2_Pin TT_Pin T1_Pin */
@@ -570,6 +571,12 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(Trigger_IN_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : LED1 PC13*/
+   GPIO_InitStruct.Pin = GPIO_PIN_13;
+   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_MEDIUM;
+   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
 }
 

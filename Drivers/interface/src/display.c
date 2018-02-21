@@ -1,4 +1,5 @@
 #include <stdarg.h>
+#include <stdlib.h>
 #include "display.h"
 
 int drawCharSimple(int x, int y, unsigned char *d_char);
@@ -315,8 +316,9 @@ int DISPLAY_Char(int x, int y, unsigned char c)
 //----------------------------------------------------------
 int DISPLAY_Text(int x, int y, const char *s)
 {   
-    while(*s)
+    while(*s){
         x = DISPLAY_Char(x,y,*s++);
+    }
 	return x;
 }
 //----------------------------------------------------------
