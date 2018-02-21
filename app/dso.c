@@ -8,6 +8,7 @@
 #include "capture.h"
 #include "control.h"
 #include "softpower.h"
+#include "led.h"
 
 int16_t screenwave[DSO_GRID_W];
 
@@ -718,6 +719,7 @@ int16_t p1, p2;
     p2 = map(ch->buffer[nextindex] + DSO_ZERO_CAL, 0 , DSO_SAMPLE_MAX_VALUE, (DSO_GRID_H/2), -(DSO_GRID_H/2));
     
     p1 += ch->pos;      // add channel offset
+    p2 += ch->pos;
 
     p1 = (p1 > (DSO_GRID_H/2)) ? (DSO_GRID_H/2) : p1;     // clip point1 top if off screen
     p1 = (p1 < -(DSO_GRID_H/2)) ? -(DSO_GRID_H/2) : p1;   // clip point bottom if off screen
@@ -727,8 +729,7 @@ int16_t p1, p2;
     if( p1 == p2){
         LCD_Pixel(index + DSO_GRID_ORIGIN_X, p1 + DSO_GRID_CENTER, ch->color);
     }
-    else{  
-        p2 += ch->pos;        
+    else{
         p2 = (p2 > (DSO_GRID_H/2)) ? (DSO_GRID_H/2) : p2;   // clip point2 top
         p2 = (p2 < -(DSO_GRID_H/2)) ? -(DSO_GRID_H/2) : p2; // clip point2 bottom
         LCD_Line(index + DSO_GRID_ORIGIN_X, DSO_GRID_CENTER + p1, 
@@ -842,6 +843,11 @@ uint32_t btn;
 			case TRIGGER_AUTO:              // display signal even if trigger not present
                 if(CAP_IsEnded()){
                    DSO_DrawWaves();
+                   if( CAP_Triggered()){
+                	   LED1_ON;
+                	   DelayMs(10);
+                	   LED1_OFF;
+                   }
                    CAP_Start(dso.channels[DSO_SIGNAL0_CHANNEL].buffer, DSO_MAX_SAMPLES );
                 }
                 break;

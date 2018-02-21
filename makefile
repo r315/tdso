@@ -152,7 +152,7 @@ GPP = gcc
 XTARGET  =$(TARGET)
 XLIBPATH =.
 XOBJPATH =$(OBJPATH)
-XINCPATH =Inc Drivers/inc
+XINCPATH =$(INCSPATH)
 
 XCSRC =tdso_main.c dso.c capture_emu.c tdso_util.c control.c softpower.c
 XOBJS = $(addprefix $(XOBJPATH)/, $(XCSRC:.c=.obj))
