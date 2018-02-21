@@ -126,7 +126,7 @@ int main(int argc, char *argv[]){
    	
     while(loop){
 
-		if( BUTTON_Hit() == BUTTON_PRESSED){
+		if( BUTTON_Read() == BUTTON_PRESSED){
 	        switch(BUTTON_GetValue()){
 	            case BUTTON_LEFT:
 	                LCD_WriteString("LEFT ");		

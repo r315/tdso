@@ -142,7 +142,7 @@ void BUTTON_Init(int ht){
 	__button.htime = ht;
 }
 
-int BUTTON_Hit(void){
+int BUTTON_Read(void){
 static SDL_Event event;
 
     if(SDL_PollEvent(&event)){       
@@ -187,12 +187,12 @@ static SDL_Event event;
 
 void BUTTON_WaitEvent(int event){
  do{
-     BUTTON_Hit();
+     BUTTON_Read();
  }while(__button.event != event);    
 }
 
 				   
-int BUTTON_Read(void){
+int BUTTON_Get(void){
     BUTTON_WaitEvent(BUTTON_PRESSED);
     return __button.button; 
 }
