@@ -52,5 +52,7 @@ void CONTROL_SelectScale(uint8_t scale){}
 void CONTROL_SetTriggerLevel(int16_t level){}
 void CONTROL_SetTriggerEdge(uint16_t edge) {}
 #elif defined(__BLUEBOARD__)
-
+void CONTROL_SelectScale(uint8_t scale){}
+void CONTROL_SetTriggerLevel(int16_t level){}
+void CONTROL_SetTriggerEdge(uint16_t edge) {}
 #endif

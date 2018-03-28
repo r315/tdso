@@ -86,13 +86,15 @@ int8_t step = 0;
     }
 }
 //--------------------------------------------------------
-uint8_t done = 0, idx = 6;
+uint8_t cdone = 0, idx = 6;
+
+#if defined(__TDSO__)
 uint16_t buf[2048];
 
 void __DMA1_Channel1_IRQHandler(void){
     DMA1_Channel1->CCR &= ~DMA_CCR_EN;
     DMA1->IFCR |= DMA_IFCR_CGIF1;  // TODO: ADD DMA Error handling ?
-    done = 1;
+    cdone = 1;
 }
 
 void TEST_Config_DMA(void){
@@ -127,19 +129,19 @@ void TEST_Capture(void){
     DMA1_Channel1->CNDTR = 128;
     DMA1_Channel1->CCR |= DMA_CCR_EN;
     TIM4->CR1 |= 1;
-    done = 0;
-    while(!done){
+    cdone = 0;
+    while(!cdone){
         DelayMs(200);
     }
 }
-
+#endif
 
 void TEST_Run(void){
-
+#if defined(__TDSO__)
     TEST_Config_DMA();
     TEST_Enable_ADC();
     TEST_Enable_TIM4(20000);
-
+#endif
     while(1){
         //TEST_Capture();
         TEST_FrontendSelector(&idx);

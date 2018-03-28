@@ -36,7 +36,7 @@ unsigned int uitime = 0;
 void TEST_BlinkLed(uint8_t times);
 void TEST_Run(void);
 
-
+#if defined(__TDSO__)
 #define DMA_CCR_PL_Medium   (1<<12)
 #define DMA_CCR_MSIZE_8     (0<<10)
 #define DMA_CCR_MSIZE_16    (1<<10)
@@ -119,22 +119,24 @@ void SPI_Send_DMA(uint8_t data){
 	while((SPI1->SR & SPI_SR_BSY) != 0 );
 
 }
+#endif /* __TDSO__ */
+
+int main(void){
 
 
-void tdo_main(void){
-
+#if defined(__TDSO__)
+    //TODO: Add call to main in stm lib
 	SPI1->CR1 |= SPI_CR1_SPE;
 	SPI_Send_DMA(0xFF);
-
-    LCD_Init();
 
     DMA1_Channel3->CPAR = (uint32_t)&SPI1->DR;
     DMA1_Channel3->CCR = DMA_CCR_PL_Medium |
     					 DMA_CCR_MSIZE_8  |
     					 DMA_CCR_PSIZE_8  |
     					 DMA_CCR_DIR;
+#endif /* __TDSO__ */
 
-
+    LCD_Init();
     LCD_Clear(BLACK);
     //GPIOB->BSRR = (1<<9);
 
@@ -155,6 +157,7 @@ void tdo_main(void){
           DSO_Run(ON);
         }
     }
+return 0;
 }
 #endif
 

@@ -89,7 +89,7 @@ extern "C" {
 #define VS_1V 1000
 #define VS_1V_IDX 				0//6
 
-#ifdef __LPCXpresso__
+#if defined(__LPCXpresso__)
 #define DSO_ADC_CHANNEL 		ADC_5
 #else
 #define DSO_ADC_CHANNEL 		ADC_0

@@ -5,55 +5,26 @@ TARGET =tdso
 PRJPATH =.
 OBJPATH =obj
 
-CSRCPATH =Src app Drivers/STM32F1xx_HAL_Driver/Src Drivers/interface/src \
-Middlewares/ST/STM32_USB_Device_Library/Core/Src Middlewares/ST/STM32_USB_Device_Library/Class/DFU/Src
+#Drivers/interface/src
+CSRCPATH =app \
+libemb/drv/lcd libemb/button libemb/drv/lcd libemb/display libemb/drv/clock
 
-INCSPATH =Inc Src app \
-Drivers/interface/inc \
-Drivers/inc Drivers/STM32F1xx_HAL_Driver/Inc \
-Middlewares/ST/STM32_USB_Device_Library/Class/DFU/Inc \
-Drivers/CMSIS/Device/ST/STM32F1xx/Include \
-Drivers/CMSIS/Include Middlewares/ST/STM32_USB_Device_Library/Core/Inc
+INCSPATH =app \
+libemb libemb/inc libemb/display libemb/drv/gpio libemb/drv/lcd libemb/button \
+bsp/blueboard
 
-CSRCS =main.c \
-stm32f1xx_it.c \
-stm32f1xx_hal_pcd.c \
-stm32f1xx_hal_pcd_ex.c \
-stm32f1xx_hal_msp.c \
-stm32f1xx_hal_rcc.c \
-stm32f1xx_hal_gpio.c \
-stm32f1xx_hal.c \
-stm32f1xx_hal_tim.c \
-stm32f1xx_hal_rcc_ex.c \
-stm32f1xx_hal_tim_ex.c \
-stm32f1xx_hal_cortex.c \
-stm32f1xx_hal_dma.c \
-stm32f1xx_hal_adc.c \
-stm32f1xx_hal_adc_ex.c \
-stm32f1xx_hal_i2c.c \
-stm32f1xx_hal_spi.c \
-stm32f1xx_ll_usb.c \
-usbd_core.c \
-usbd_ctlreq.c \
-usbd_ioreq.c \
-usbd_conf.c \
-usbd_desc.c \
-usbd_dfu.c \
-usbd_dfu_if.c \
-usb_device.c \
+CSRCS = \
 button.c \
 display.c \
 fonts.c \
-ili9341.c \
 lcd.c \
 dso.c \
-capture_stm32.c \
+capture_bb.c \
 control.c \
 softpower.c \
-tests.c \
 tdso_main.c \
-tdso_util.c
-GCSYMBOLS =__TDSO__ STM32F103xB USE_HAL_DRIVER __weak='__attribute__((weak))' __packet='__attribute__((__packed__))' LCD_DMA
+tdso_util.c \
+tests.c
 #########################################################
 # TOOLCHAIN
 #########################################################
@@ -68,23 +39,12 @@ OBJDUMP = $(GCC_EXEC_PREFIX)-objdump
 DBG = $(GCC_EXEC_PREFIX)-insight
 JLINK =JLinkExe
 REMOVE = rm -f
-#########################################################
-#Startup files and libraries
-#########################################################
-BSPPATH   =startup
-INCSPATH +=
-LIBSPATH +=lib
-DEVICE  =STM32F103C8
-GCFLAGS =-mcpu=cortex-m3 -mthumb -mfloat-abi=soft -Og -g3 -Wall -fmessage-length=0 -ffunction-sections
-#GCFLAGS =-O3 -mcpu=cortex-m3 -mthumb -Wall -g
-LDFLAGS =-mcpu=cortex-m3 -mthumb -mfloat-abi=soft -Wl,--gc-sections
-LIBS =-nostdlib #-lgcc -lc -lnosys
-CSRCS   +=system_stm32f1xx.c
-ASRCS   +=startup_stm32f103xb.s
-LDSCRIPT ="startup/STM32F103C8Tx_FLASH.ld"
 ##########################################################
+
 OBJECTS =$(addprefix $(OBJPATH)/, $(CSRCS:.c=.o)) $(addprefix $(OBJPATH)/,$(ASRCS:.s=.o))
-VPATH += $(CSRCPATH) $(BSPPATH) $(LIBSPATH)
+VPATH += $(CSRCPATH)
+
+-include bsp/blueboard/sources.mk
 
 all: $(TARGET).bin stats
 
@@ -101,8 +61,9 @@ $(TARGET).bin: $(TARGET).axf
 	@$(OBJCOPY) -O binary -j .text -j .data $(TARGET).axf $(TARGET).bin
 
 stats: $(TARGET).axf
-	@echo "---- Sections Summary ---"
+	@echo "\n---- Sections Summary ---"
 	@$(SIZE) -A -x $<
+	@$(SIZE) -t  $<
 
 aslist: $(TARGET).axf
 	@$(OBJDUMP) -D $(TARGET).axf > $(TARGET).lst
@@ -112,7 +73,8 @@ dis: $(TARGET).axf
 
 
 clean:
-	$(REMOVE) $(OBJECTS) $(XOBJS) $(TARGET) $(TARGET).exe $(TARGET).hex $(TARGET).axf *.bin	
+	$(REMOVE) $(OBJECTS) $(XOBJS) $(TARGET) $(TARGET).exe $(TARGET).hex $(TARGET).axf *.bin libemu.a
+	
 
 rebuild: clean all
 
@@ -139,7 +101,7 @@ program: $(TARGET).axf $(TARGET).cfg
 
 $(OBJPATH)/%.o : %.c
 	@echo "---- Compile" $< "---->" $@
-	$(GCC) $(GCFLAGS) $(addprefix -I, $(INCSPATH)) $(addprefix -D, $(GCSYMBOLS))  -c $< -o $@
+	@$(GCC) $(GCFLAGS) $(addprefix -I, $(INCSPATH)) $(addprefix -D, $(GCSYMBOLS))  -c $< -o $@
 	
 $(OBJPATH)/%.o : %.s
 	@echo "---- Assemble" $< "---->" $@
@@ -152,7 +114,9 @@ GPP = gcc
 XTARGET  =$(TARGET)
 XLIBPATH =.
 XOBJPATH =$(OBJPATH)
-XINCPATH =$(INCSPATH)
+XINCPATH =libemb libemb/lcdemulator libemb/display libemb/button libemb/drv/gpio app
+
+XLIBEMU =libemu.a
 
 XCSRC =tdso_main.c dso.c capture_emu.c tdso_util.c control.c softpower.c
 XOBJS = $(addprefix $(XOBJPATH)/, $(XCSRC:.c=.obj))
@@ -160,15 +124,14 @@ XOBJS = $(addprefix $(XOBJPATH)/, $(XCSRC:.c=.obj))
 XCFLAGS =-Wall -D__EMU__
 
 ifeq ($(shell uname -s),Linux)
-XLIBS +=-lSDL2 -lm
+XLIBS +=-lemu -lSDL2 -lm 
 
-emulator: XLIBS +=-lemu
+$(XLIBEMU):
+	$(MAKE) -C libemb/lcdemulator lib
+
 emulator: $(XTARGET)
 	./$(XTARGET)	
 
-emulatorx64: XLIBS +=-lemux64
-emulatorx64: $(XTARGET)
-	./$(XTARGET)
 else
 
 XLIBS =-lemu -lmingw32 -lSDL2main -lSDL2 -lm
@@ -180,7 +143,7 @@ emulator: $(XTARGET)
 	cmd /c $(XTARGET).exe
 endif
 
-$(XTARGET): $(XOBJS)
+$(XTARGET): $(XOBJS) $(XLIBEMU)
 	$(GPP) $(XOBJS) $(XCFLAGS) $(addprefix -L, $(XLIBPATH)) $(XLIBS) -o $(XTARGET)
 
 $(XOBJPATH)/%.obj: %.c

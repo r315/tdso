@@ -8,7 +8,7 @@
 #include <common.h>
 #include <softpower.h>
 
-#if !defined(__EMU__)
+#if defined(__TDSO__)
 extern ADC_HandleTypeDef hadc2;
 
 uint16_t SOFTPOWER_Read(void){

@@ -40,7 +40,7 @@ enum {
 #define CONTROL_TGLEVEL_MAX (CONTROL_TGPWM_OFFSET)
 
 
-#elif defined(__EMU__)
+#elif defined(__EMU__) || defined(__BLUEBOARD__)
 
 #else
 #error config board

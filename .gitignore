@@ -2,6 +2,7 @@
 .mxproject
 .project
 .settings/
+libemb/
 obj/
 test/
-/Debug/
+Debug/

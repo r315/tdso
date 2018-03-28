@@ -10,7 +10,7 @@
 #include "softpower.h"
 #include "led.h"
 
-int16_t screenwave[DSO_GRID_W];
+int16_t screenwave[DSO_GRID_W +1];
 
 static Dso dso;
 static const uint16_t tbases[] =  {10, 20, 50, 100, 200, 500, TB_1MS, 2000, 5000, 10000, 20000, 50000};  //us values
@@ -303,15 +303,15 @@ Channel *ch;
         switch(BUTTON_GetValue()){
 #if defined(__BLUEBOARD__)
             case BUTTON_UP:
-                DSO_ChannelMoveVpos(&dso.channels[0].cursor,-1);
+                //DSO_ChannelMoveVpos(&dso.channels[0].cursor,-1);
                 break;
             case BUTTON_DOWN:
-                DSO_ChannelMoveVpos(&dso.channels[0].cursor,1);
+                //DSO_ChannelMoveVpos(&dso.channels[0].cursor,1);
                 break;
 
             case BUTTON_LEFT:
             case BUTTON_RIGHT:
-                DSO_ChannelMoveVpos(&dso.channels[0].cursor,-dso.channels[0].cursor.pos);
+                //DSO_ChannelMoveVpos(&dso.channels[0].cursor,-dso.channels[0].cursor.pos);
                 break;
 #else
             case BUTTON_LEFT:
