@@ -10,21 +10,10 @@ CSRCPATH =app \
 libemb/drv/lcd libemb/button libemb/drv/lcd libemb/display libemb/drv/clock
 
 INCSPATH =app \
-libemb libemb/inc libemb/display libemb/drv/gpio libemb/drv/lcd libemb/button \
-bsp/blueboard
+libemb libemb/inc libemb/display libemb/drv/gpio libemb/drv/lcd libemb/button libemb/drv/spi
 
-CSRCS = \
-button.c \
-display.c \
-fonts.c \
-lcd.c \
-dso.c \
-capture_bb.c \
-control.c \
-softpower.c \
-tdso_main.c \
-tdso_util.c \
-tests.c
+CSRCS = button.c display.c fonts.c lcd.c dso.c control.c softpower.c tdso_main.c tdso_util.c tests.c
+
 #########################################################
 # TOOLCHAIN
 #########################################################
@@ -44,7 +33,7 @@ REMOVE = rm -f
 OBJECTS =$(addprefix $(OBJPATH)/, $(CSRCS:.c=.o)) $(addprefix $(OBJPATH)/,$(ASRCS:.s=.o))
 VPATH += $(CSRCPATH)
 
--include bsp/blueboard/sources.mk
+-include bsp/bluepill/sources.mk
 
 all: $(TARGET).bin stats
 

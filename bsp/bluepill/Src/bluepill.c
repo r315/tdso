@@ -107,7 +107,7 @@ void TEST_Run(void);
 
 /* USER CODE END 0 */
 
-int main(void)
+void BluePill_Init(void)
 {
 
   /* USER CODE BEGIN 1 */
@@ -154,20 +154,6 @@ int main(void)
   //HAL_SPI_Transmit(&hspi1, (uint8_t*)&hspi1, 1, 10);
 
   ADC_Enable(&hadc2); // enable soft power button adc
-
-  tdo_main();
-
-  /* USER CODE END 2 */
-
-  /* Infinite loop */
-  /* USER CODE BEGIN WHILE */
-  while (1)
-  {
-  /* USER CODE END WHILE */
-
-  /* USER CODE BEGIN 3 */;
-  }
-  /* USER CODE END 3 */
 
 }
 

@@ -2,7 +2,7 @@
 # Board specific files
 #########################################################
 CSRCPATH +=bsp/blueboard bsp/blueboard/startup
-INCSPATH +=
+INCSPATH +=bsp/blueboard
 LDSCRIPT ="bsp/blueboard/startup/linker.ld"
 
 CSRCS +=blueboard.c ili9328.c startup.c #mystdlib.c
