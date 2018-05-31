@@ -258,16 +258,6 @@ void DSO_ClearGrid(void){
     
 }
 
-void DSO_HideMenu(Menu *dm){
-uint16_t i;
-    for(i = dm->x; i < dm->x + dm->w; i++)
-        DSO_DrawGridSlice(
-            -((DSO_GRID_H/2) - dm->y) , 
-            -((DSO_GRID_H/2) - dm->y) + dm->h , 
-            i);
-    dm->visible = OFF;
-}
-
 /**
   * @brief Draws triangle shape cursor indicating the channel position
   **/
@@ -434,10 +424,12 @@ uint16_t x,y;
 }
 
 uint8_t DSO_ShowMenu(Menu *dm){
-int8_t i;    
+int8_t i;  
 
 //printf("draw menu %u\n", dm->x);
+//DISPLAY_SetFont(corrierFont);
     if(!dm->visible){
+        //dm->h = dm->nitems * (DISPLAY_GetFontHeight() + DSO_MENU_ITEM_SPACING);
         LCD_FillRect(dm->x + DSO_GRID_ORIGIN_X,
                      dm->y + DSO_GRID_ORIGIN_Y,
                      dm->w, dm->h, dm->bcolor);
@@ -445,7 +437,7 @@ int8_t i;
         for(i=0; i< dm->nitems; i++){           
             DSO_DrawMenuItem(dm, i, i == dm->select ? ON : OFF);
         }
-        dm->visible = ON;        
+        dm->visible = ON;  
     }
     
     if(BUTTON_GetEvents() == BUTTON_PRESSED){
@@ -464,16 +456,27 @@ int8_t i;
 
             case BUTTON_A:
                 dm->visible = OFF;
-                return ON;
+                return ON;                
                 
             default:
                 return OFF;
         }             
         DSO_DrawMenuItem(dm, dm->select, ON);
         DISPLAY_SetBcolor(BLACK);
-    }   
-
+    }  
+     
+//DISPLAY_SetFont(defaultFont);  
     return OFF;
+}
+
+void DSO_HideMenu(Menu *dm){
+uint16_t i;
+    for(i = dm->x; i < dm->x + dm->w; i++)
+        DSO_DrawGridSlice(
+            -((DSO_GRID_H/2) - dm->y) , 
+            -((DSO_GRID_H/2) - dm->y) + dm->h , 
+            i);
+    dm->visible = OFF;
 }
 
 uint16_t DSO_DrawTimeBase(Dso *ds){
@@ -698,12 +701,11 @@ void DSO_TriggerInfo(Trigger *tg){
 }
 
 
-
-
 uint8_t DSO_MenuSelector(void *data){
-Menuentry *entry = &((Menu*)data)->items[((Menu*)data)->select];
+Menuentry *entry;
     if(DSO_ShowMenu((Menu*)data)){
         DSO_HideMenu((Menu*)data);
+        entry = &((Menu*)data)->items[((Menu*)data)->select];
         dso.activeControl = entry->function;
         dso.menudata = entry->data;
     }
