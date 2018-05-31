@@ -4,13 +4,14 @@
 TARGET =tdso
 PRJPATH =.
 OBJPATH =obj
+LIBEMBPATH = $(HOME)/Dropbox/Projects/software/libemb
 
 #Drivers/interface/src
 CSRCPATH =app \
-libemb/drv/lcd libemb/button libemb/drv/lcd libemb/display libemb/drv/clock
+$(LIBEMBPATH)/drv/lcd $(LIBEMBPATH)/button $(LIBEMBPATH)/drv/tft $(LIBEMBPATH)/display $(LIBEMBPATH)/drv/clock
 
 INCSPATH =app \
-libemb libemb/inc libemb/display libemb/drv/gpio libemb/drv/lcd libemb/button libemb/drv/spi
+$(LIBEMBPATH)/include
 
 CSRCS = button.c display.c fonts.c lcd.c dso.c control.c softpower.c tdso_main.c tdso_util.c tests.c
 
@@ -103,7 +104,7 @@ GPP = gcc
 XTARGET  =$(TARGET)
 XLIBPATH =.
 XOBJPATH =$(OBJPATH)
-XINCPATH =libemb libemb/lcdemulator libemb/display libemb/button libemb/drv/gpio app
+XINCPATH =$(LIBEMBPATH)/lcdemulator $(LIBEMBPATH)/display $(LIBEMBPATH)/button $(LIBEMBPATH)/drv/gpio app
 
 XLIBEMU =libemu.a
 
@@ -116,7 +117,7 @@ ifeq ($(shell uname -s),Linux)
 XLIBS +=-lemu -lSDL2 -lm 
 
 $(XLIBEMU):
-	$(MAKE) -C libemb/lcdemulator lib
+	$(MAKE) -C $(LIBEMBPATH)/lcdemulator lib
 
 emulator: $(XTARGET)
 	./$(XTARGET)	
