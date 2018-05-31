@@ -62,6 +62,8 @@
 #define VBAT_GPIO_Port GPIOA
 #define POWER_KEY_Pin GPIO_PIN_2
 #define POWER_KEY_GPIO_Port GPIOA
+#define V_POS_Pin GPIO_PIN_3
+#define V_POS_GPIO_Port GPIOA
 #define LCD_CS_Pin GPIO_PIN_4
 #define LCD_CS_GPIO_Port GPIOA
 #define LCD_SCK_Pin GPIO_PIN_5
@@ -70,8 +72,12 @@
 #define LCD_SDO_GPIO_Port GPIOA
 #define LCD_SDI_Pin GPIO_PIN_7
 #define LCD_SDI_GPIO_Port GPIOA
-#define TG_LEVEL_Pin GPIO_PIN_0
-#define TG_LEVEL_GPIO_Port GPIOB
+#define Trigger_IN_Pin GPIO_PIN_8
+#define Trigger_IN_GPIO_Port GPIOA
+#define TG_LEVEL_Pin GPIO_PIN_15
+#define TG_LEVEL_GPIO_Port GPIOA
+#define TST_SIG_Pin GPIO_PIN_0
+#define TST_SIG_GPIO_Port GPIOB
 #define LCD_RST_Pin GPIO_PIN_1
 #define LCD_RST_GPIO_Port GPIOB
 #define LCD_CD_Pin GPIO_PIN_10
@@ -84,10 +90,6 @@
 #define TT_GPIO_Port GPIOB
 #define T1_Pin GPIO_PIN_15
 #define T1_GPIO_Port GPIOB
-#define Trigger_IN_Pin GPIO_PIN_8
-#define Trigger_IN_GPIO_Port GPIOA
-#define TEST_SIG_Pin GPIO_PIN_15
-#define TEST_SIG_GPIO_Port GPIOA
 #define LED_Pin GPIO_PIN_3
 #define LED_GPIO_Port GPIOB
 #define SCALE0_Pin GPIO_PIN_4

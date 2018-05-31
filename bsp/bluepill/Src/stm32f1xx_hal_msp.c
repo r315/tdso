@@ -367,10 +367,20 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef* htim)
     /**TIM2 GPIO Configuration    
     PA15     ------> TIM2_CH1 
     */
-    GPIO_InitStruct.Pin = TEST_SIG_Pin;
+    GPIO_InitStruct.Pin = TG_LEVEL_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-    HAL_GPIO_Init(TEST_SIG_GPIO_Port, &GPIO_InitStruct);
+    HAL_GPIO_Init(TG_LEVEL_GPIO_Port, &GPIO_InitStruct);
+
+    //__HAL_AFIO_REMAP_TIM2_PARTIAL_1();
+
+     /**TIM2 GPIO Configuration    
+    PA3     ------> TIM2_CH4 
+    */
+    GPIO_InitStruct.Pin = V_POS_Pin;
+    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+    HAL_GPIO_Init(V_POS_GPIO_Port, &GPIO_InitStruct);
 
     __HAL_AFIO_REMAP_TIM2_PARTIAL_1();
 
@@ -387,10 +397,10 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef* htim)
     /**TIM3 GPIO Configuration    
     PB0     ------> TIM3_CH3 
     */
-    GPIO_InitStruct.Pin = TG_LEVEL_Pin;
+    GPIO_InitStruct.Pin = TST_SIG_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-    HAL_GPIO_Init(TG_LEVEL_GPIO_Port, &GPIO_InitStruct);
+    HAL_GPIO_Init(TST_SIG_GPIO_Port, &GPIO_InitStruct);
 
   /* USER CODE BEGIN TIM3_MspPostInit 1 */
 

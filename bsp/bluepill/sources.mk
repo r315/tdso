@@ -30,16 +30,16 @@ stm32f1xx_hal_adc_ex.c \
 stm32f1xx_hal_i2c.c \
 stm32f1xx_hal_spi.c \
 stm32f1xx_ll_usb.c \
-usbd_core.c \
-usbd_ctlreq.c \
-usbd_ioreq.c \
-usbd_conf.c \
-usbd_desc.c \
-usbd_dfu.c \
-usbd_dfu_if.c \
-usb_device.c \
 capture_stm32.c \
-ili9341.c
+ili9341.c\
+#usbd_core.c \
+#usbd_ctlreq.c \
+#usbd_ioreq.c \
+#usbd_conf.c \
+#usbd_desc.c \
+#usbd_dfu.c \
+#usbd_dfu_if.c \
+#usb_device.c \
 
 ASRCS +=startup_stm32f103xb.s
 

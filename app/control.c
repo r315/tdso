@@ -37,7 +37,7 @@ void CONTROL_SelectScale(uint8_t scale){
  */
 void CONTROL_SetTriggerLevel(int16_t level){
     level += CONTROL_TGPWM_CALIBRATION;
-    TIM3->CCR3 = map(level, CONTROL_TGLEVEL_MIN, CONTROL_TGLEVEL_MAX, 0, CONTROL_TGPWM_STEPS);
+    TIM2->CCR1 = map(level, CONTROL_TGLEVEL_MIN, CONTROL_TGLEVEL_MAX, 0, CONTROL_TGPWM_STEPS);
 }
 
 /*

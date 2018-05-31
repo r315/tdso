@@ -56,8 +56,15 @@
 #include <display.h>
 #include "../app/dso.h"
 #include "softpower.h"
+#include <spi.h>
 
 /* USER CODE END Includes */
+
+#if defined(LCD_DMA)
+void LCD_Fill_DMA(uint32_t count, uint16_t color);
+void LCD_Fill_Data_DMA(uint32_t count, uint16_t *data);
+void SPI_Init_DMA(void);
+#endif
 
 /* Private variables ---------------------------------------------------------*/
 ADC_HandleTypeDef hadc1;
@@ -87,14 +94,11 @@ static void MX_ADC1_Init(void);
 static void MX_I2C1_Init(void);
 static void MX_SPI1_Init(void);
 static void MX_TIM2_Init(void);
-static void MX_USART1_UART_Init(void);
 static void MX_TIM3_Init(void);
 static void MX_ADC2_Init(void);
-static void MX_TIM4_Init(void);
 
 void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
-                                
-void tdo_main(void);                                
+                                                            
 
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
@@ -135,13 +139,17 @@ void BluePill_Init(void)
   MX_DMA_Init();
   MX_ADC1_Init();
   MX_I2C1_Init();
-  MX_SPI1_Init();
   MX_TIM2_Init();
   //MX_USART1_UART_Init();
   MX_TIM3_Init();
   MX_ADC2_Init();
   //MX_USB_DEVICE_Init();
-  MX_TIM4_Init();
+  //MX_TIM4_Init();
+  MX_SPI1_Init();
+
+  #if defined(LCD_DMA)
+   SPI_Init_DMA();
+  #endif
 
   /* USER CODE BEGIN 2 */
 
@@ -151,11 +159,117 @@ void BluePill_Init(void)
   HAL_TIM_Base_Start(&htim2);
   HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1); //start Test signal
 
+  HAL_TIM_Base_Start(&htim2);
+  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_4); //start Test signal
+
   //HAL_SPI_Transmit(&hspi1, (uint8_t*)&hspi1, 1, 10);
 
   ADC_Enable(&hadc2); // enable soft power button adc
 
 }
+
+/**
+ * Spi functions using DMA
+ */ 
+
+#if defined(LCD_DMA)
+#define DMA_CCR_PL_Medium   (1<<12)
+#define DMA_CCR_MSIZE_8     (0<<10)
+#define DMA_CCR_MSIZE_16    (1<<10)
+#define DMA_CCR_MSIZE_32    (2<<10)
+#define DMA_CCR_PSIZE_16    (1<<8)
+#define DMA_CCR_PSIZE_8     (0<<8)
+
+void LCD_DMA_XFER(uint32_t count, uint16_t *data, uint8_t isbuf){
+	GPIOB->BRR = (1<<9);
+
+    DMA1_Channel3->CMAR = (uint32_t)data;
+    DMA1_Channel3->CCR =
+       		DMA_CCR_PL_Medium |   // priority
+   			DMA_CCR_MSIZE_16  |   // 16bit src size
+   			DMA_CCR_PSIZE_16  |   // 16bit dst size
+   			DMA_CCR_DIR       ;   // Read from Memory
+
+    if(isbuf){
+    	 DMA1_Channel3->CCR |= DMA_CCR_MINC;
+    }
+
+    // Configure Spi for 16bit DMA
+   	SPI1->CR1 &= ~SPI_CR1_SPE;
+    SPI1->CR2 |= SPI_CR2_TXDMAEN;
+    SPI1->CR1 |= SPI_CR1_DFF | SPI_CR1_SPE;
+
+    // DMA only supports transfers of 65536
+    while(count > 0x10000){
+    	DMA1_Channel3->CNDTR = 0xFFFF;
+    	DMA1_Channel3->CCR |= DMA_CCR_EN;
+    	 while(!(DMA1->ISR & DMA_ISR_TCIF3)){
+    	    }
+    	DMA1->IFCR = DMA_IFCR_CGIF3;
+
+    	 DMA1_Channel3->CCR &= ~DMA_CCR_EN;
+    	 count -= 0x10000;
+    }
+
+    // Send the remaining
+    if(count){
+		DMA1_Channel3->CNDTR = count;
+		DMA1_Channel3->CCR |= DMA_CCR_EN;
+
+		while((DMA1->ISR & DMA_ISR_TCIF3) == 0 );
+
+		DMA1->IFCR = DMA_IFCR_CGIF3;
+		//DMA1_Channel3->CCR &= ~DMA_CCR_EN;
+		 DMA1_Channel3->CCR =
+		    		DMA_CCR_PL_Medium |
+					DMA_CCR_MSIZE_8  |
+					DMA_CCR_PSIZE_8  |
+					DMA_CCR_DIR;
+
+		// wait for last transfer
+		while((SPI1->SR & SPI_SR_TXE) == 0 );
+		while((SPI1->SR & SPI_SR_BSY) != 0 );
+    }
+
+    // Restore 8bit Spi
+	SPI1->CR1 &= ~(SPI_CR1_SPE | SPI_CR1_DFF);
+	SPI1->CR2 = 0;
+	SPI1->CR1 |= SPI_CR1_SPE;
+
+	GPIOB->BSRR = (1<<9);
+}
+
+
+void LCD_Fill_DMA(uint32_t count, uint16_t color){
+	LCD_DMA_XFER(count, &color, OFF);
+}
+
+
+void LCD_Fill_Data_DMA(uint32_t count, uint16_t *data){
+	LCD_DMA_XFER(count, data, ON);
+}
+
+void SPI_Init_DMA(void){
+  SPI1->CR1 |= SPI_CR1_SPE;
+	SPI_Send(0xFF);
+
+  DMA1_Channel3->CPAR = (uint32_t)&SPI1->DR;
+  DMA1_Channel3->CCR = DMA_CCR_PL_Medium |
+              DMA_CCR_MSIZE_8  |
+              DMA_CCR_PSIZE_8  |
+              DMA_CCR_DIR;
+}
+
+uint16_t SPI_Send(uint16_t data){
+	SPI1->DR = data;
+	while((SPI1->SR & SPI_SR_TXE) == 0 );
+	while((SPI1->SR & SPI_SR_BSY) != 0 );
+}
+#else
+uint16_t SPI_Send(uint16_t data){                
+  HAL_SPI_Transmit(&hspi1, &data, 1, 10);
+} 
+#endif /* __TDSO__ */
 
 /** System Clock Configuration
 */
@@ -346,9 +460,9 @@ static void MX_TIM2_Init(void)
   TIM_OC_InitTypeDef sConfigOC;
 
   htim2.Instance = TIM2;
-  htim2.Init.Prescaler = 72-1;
+  htim2.Init.Prescaler = 32-1;
   htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim2.Init.Period = 1000-1;
+  htim2.Init.Period = 200-1;
   htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim2) != HAL_OK)
@@ -375,10 +489,19 @@ static void MX_TIM2_Init(void)
   }
 
   sConfigOC.OCMode = TIM_OCMODE_PWM1;
-  sConfigOC.Pulse = 500-1;
+  sConfigOC.Pulse = 79;
   sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
   sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
   if (HAL_TIM_PWM_ConfigChannel(&htim2, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+  sConfigOC.OCMode = TIM_OCMODE_PWM1;
+  sConfigOC.Pulse = 79;
+  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+  if (HAL_TIM_PWM_ConfigChannel(&htim2, &sConfigOC, TIM_CHANNEL_4) != HAL_OK)
   {
     _Error_Handler(__FILE__, __LINE__);
   }
@@ -396,9 +519,9 @@ static void MX_TIM3_Init(void)
   TIM_OC_InitTypeDef sConfigOC;
 
   htim3.Instance = TIM3;
-  htim3.Init.Prescaler = 32-1;
+  htim3.Init.Prescaler = 72-1;
   htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim3.Init.Period = 200-1;
+  htim3.Init.Period = 1000-1;
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
@@ -425,7 +548,7 @@ static void MX_TIM3_Init(void)
   }
 
   sConfigOC.OCMode = TIM_OCMODE_PWM1;
-  sConfigOC.Pulse = 79;
+  sConfigOC.Pulse = 500-1;
   sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
   sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
   if (HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_3) != HAL_OK)
@@ -437,60 +560,6 @@ static void MX_TIM3_Init(void)
 
 }
 
-/* TIM4 init function */
-static void MX_TIM4_Init(void)
-{
-
-  TIM_MasterConfigTypeDef sMasterConfig;
-  TIM_OC_InitTypeDef sConfigOC;
-
-  htim4.Instance = TIM4;
-  htim4.Init.Prescaler = 36-1;
-  htim4.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim4.Init.Period = 40000;
-  htim4.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-  htim4.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-  if (HAL_TIM_PWM_Init(&htim4) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }
-
-  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
-  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-  if (HAL_TIMEx_MasterConfigSynchronization(&htim4, &sMasterConfig) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }
-
-  sConfigOC.OCMode = TIM_OCMODE_PWM2;
-  sConfigOC.Pulse = 20000;
-  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
-  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
-  if (HAL_TIM_PWM_ConfigChannel(&htim4, &sConfigOC, TIM_CHANNEL_4) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }
-
-}
-
-/* USART1 init function */
-static void MX_USART1_UART_Init(void)
-{
-
-  huart1.Instance = USART1;
-  huart1.Init.BaudRate = 115200;
-  huart1.Init.WordLength = UART_WORDLENGTH_8B;
-  huart1.Init.StopBits = UART_STOPBITS_1;
-  huart1.Init.Parity = UART_PARITY_NONE;
-  huart1.Init.Mode = UART_MODE_TX_RX;
-  huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
-  huart1.Init.OverSampling = UART_OVERSAMPLING_16;
-  if (HAL_UART_Init(&huart1) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }
-
-}
 
 /** 
   * Enable DMA controller clock

@@ -113,7 +113,7 @@ void CAP_Init(void){
     /* Configure PA8 to trigger timer1 capture */
     RCC->APB2ENR |= RCC_APB2ENR_IOPAEN;     // Enable GPIOA
     GPIOA->CRH &= ~(0x0f<<00);
-    GPIOA->CRH |= (0x04<<0);
+    GPIOA->CRH |= (0x04<<0);				// PA8 Floating input
 
 
     /* Configure Timer 1 as slave */
