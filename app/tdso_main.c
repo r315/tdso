@@ -16,17 +16,17 @@ unsigned int uitime = 0;
 
 	LCD_Rotation(LCD_LANDSCAPE);
 
-	DISPLAY_SetFont(FONT_PIXELDUST);
+	//DISPLAY_SetFont(FONT_PIXELDUST);
 	
 	DSO_Init();
 
     while(loop){    
-    	if(uitime < GetTick()){
+    	if(uitime < GetTicks()){
     	    DSO_Run(OFF);    		
     		#ifdef __EMU__
-    		uitime = GetTick() + 10;
+    		uitime = GetTicks() + 10;
     		#else
-    		uitime = GetTick() + 5;
+    		uitime = GetTicks() + 5;
     		#endif
     	}
     }
@@ -38,9 +38,7 @@ void TEST_Run(void);
 
 int main(void){
 
-#if defined(__TDSO__)
-	BluePill_Init();
-#endif /* __TDSO__ */
+	Board_Init();
 
     LCD_Init();
     LCD_Clear(BLACK);

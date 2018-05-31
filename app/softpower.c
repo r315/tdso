@@ -9,6 +9,8 @@
 #include <softpower.h>
 
 #if defined(__TDSO__)
+#include "stm32f1xx_hal.h"
+
 extern ADC_HandleTypeDef hadc2;
 
 uint16_t SOFTPOWER_Read(void){

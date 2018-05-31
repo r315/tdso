@@ -107,7 +107,7 @@ void CAP_Init(void){
             ADC_CR2_DMA;                    // Enable DMA Request
 
     HAL_NVIC_SetPriority(DMA1_Channel1_IRQn, 0, 0); // Highest priority
-    HAL_NVIC_EnableIRQ(DMA1_Channel1_IRQn);
+    NVIC_EnableIRQ(DMA1_Channel1_IRQn);
 
 
     /* Configure PA8 to trigger timer1 capture */
@@ -128,7 +128,7 @@ void CAP_Init(void){
     TIM1->DIER = TIM_DIER_CC1IE | TIM_DIER_CC2IE;            // Enable capture interrupt
     TIM1->ARR   = 0xFFFF;                   // allow max count for capture
 
-    HAL_NVIC_EnableIRQ(TIM1_CC_IRQn);
+    NVIC_EnableIRQ(TIM1_CC_IRQn);
     TIM1->CR1 = 1;
 
     done = 1;

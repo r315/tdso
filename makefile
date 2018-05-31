@@ -13,7 +13,7 @@ $(LIBEMBPATH)/drv/lcd $(LIBEMBPATH)/button $(LIBEMBPATH)/drv/tft $(LIBEMBPATH)/d
 INCSPATH =app \
 $(LIBEMBPATH)/include
 
-CSRCS = button.c display.c fonts.c lcd.c dso.c control.c softpower.c tdso_main.c tdso_util.c tests.c
+CSRCS = button.c display.c lcd.c dso.c control.c softpower.c tdso_main.c tdso_util.c tests.c
 
 #########################################################
 # TOOLCHAIN
@@ -104,7 +104,7 @@ GPP = gcc
 XTARGET  =$(TARGET)
 XLIBPATH =.
 XOBJPATH =$(OBJPATH)
-XINCPATH =$(LIBEMBPATH)/lcdemulator $(LIBEMBPATH)/display $(LIBEMBPATH)/button $(LIBEMBPATH)/drv/gpio app
+XINCPATH =$(LIBEMBPATH)/include app
 
 XLIBEMU =libemu.a
 

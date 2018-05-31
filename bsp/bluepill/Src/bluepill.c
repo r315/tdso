@@ -46,7 +46,7 @@
   ******************************************************************************
   */
 /* Includes ------------------------------------------------------------------*/
-#include "main.h"
+#include "bluepill.h"
 #include "stm32f1xx_hal.h"
 #include "usb_device.h"
 
@@ -111,7 +111,7 @@ void TEST_Run(void);
 
 /* USER CODE END 0 */
 
-void BluePill_Init(void)
+void Board_Init(void)
 {
 
   /* USER CODE BEGIN 1 */
@@ -264,6 +264,7 @@ uint16_t SPI_Send(uint16_t data){
 	SPI1->DR = data;
 	while((SPI1->SR & SPI_SR_TXE) == 0 );
 	while((SPI1->SR & SPI_SR_BSY) != 0 );
+  return SPI1->DR;
 }
 #else
 uint16_t SPI_Send(uint16_t data){                

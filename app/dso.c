@@ -772,6 +772,7 @@ void DSO_systemInfo(void){
 #endif
 	LCD_Bkl(ON);
 	DelayMs(1000);
+    LCD_Bkl(OFF);
 }
 
 void DSO_Init(void){
@@ -830,6 +831,8 @@ void DSO_Init(void){
 
     memset(screenwave,0,512); // clear old wave storage
 
+    LCD_Bkl(ON);
+
     CAP_Init();
     CAP_SetSampleRate(tbases[dso.timebase]);
 }
@@ -838,11 +841,11 @@ void DSO_Run(uint8_t doloop){
 uint32_t ticks;
 uint32_t btn;
 	do{
-      ticks = GetTick();	   
+      ticks = GetTicks();	   
 		switch(dso.trigger.mode){
 			case TRIGGER_AUTO:              // display signal even if trigger not present
                 if(CAP_IsEnded()){
-                   DSO_DrawWaves();
+                   DSO_DrawWaves(); 
                    if( CAP_Triggered()){
                 	   LED1_ON;
                 	   DelayMs(10);

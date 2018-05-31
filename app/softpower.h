@@ -8,6 +8,8 @@
 #ifndef SOFTPOWER_H_
 #define SOFTPOWER_H_
 
+#include <gpio.h>
+
 #define SOFTPOWER_PRESSED_VALUE 3000
 
 #if defined(__TDSO__)

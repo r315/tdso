@@ -23,7 +23,7 @@ void TEST_BlinkLed(uint8_t times){
  * @brief test softpower
  */
 void TEST_Buttons(void){
-uint32_t time = GetTick();
+uint32_t time = GetTicks();
 char *btn = "";
 	while(1){
 		uint32_t event = BUTTON_Read();
@@ -37,7 +37,7 @@ char *btn = "";
 					}
 		}
 		else{
-		time = GetTick();
+		time = GetTicks();
 
 		if(event == BUTTON_PRESSED){
 			switch(BUTTON_GetValue()){
