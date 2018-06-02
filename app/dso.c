@@ -550,7 +550,7 @@ uint8_t DSO_SelectTbase(void *data){
             default:
                 break;;
             }
-            CAP_SetSampleRate(DSO_DrawTimeBase(&dso));
+            CAP_SetSampleRate(DSO_DrawTimeBase(&dso) / DSO_SAMPLES_PER_DIVISION);
     }
     return OFF; 
 }
@@ -836,7 +836,7 @@ void DSO_Init(void){
     LCD_Bkl(ON);
 
     CAP_Init();
-    CAP_SetSampleRate(tbases[dso.timebase]);
+    CAP_SetSampleRate(tbases[dso.timebase] / DSO_SAMPLES_PER_DIVISION);
 }
 
 void DSO_Run(uint8_t doloop){

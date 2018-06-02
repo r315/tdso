@@ -22,6 +22,13 @@ uint16_t SOFTPOWER_Read(void){
 	adcResult = HAL_ADC_GetValue(&hadc2);
 
 	HAL_ADC_Stop(&hadc2);
+	  /* TODO: Remove adc2 reconfiguration workaround dur to power button reading */
+	    ADC2->CR2 = ADC_CR2_EXTTRIG  |
+	        		ADC_CR2_EXTSEL_2 |          // Select Ext for dual convertion
+	    			ADC_CR2_EXTSEL_1 |
+	        		ADC_CR2_EXTSEL_0 |
+	    			ADC_CR2_ADON;
+	    ADC2->SQR3 = 0;							    // Select AN channel 0
 	return adcResult;
 }
 

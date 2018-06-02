@@ -73,6 +73,8 @@ void DMA1_Channel1_IRQHandler(void){
 #define TIMxCCMR1_OC2M_PWM_M2        (7<<12)
 #define TIMxCCMR1_OC2CE              (1<<15)
 
+#define ADC_CR1_FAST_INTERLEAVED     (7<<16)
+
 void CAP_Init(void){
     /* Configure DMA Channel1*/
     RCC->AHBENR |= RCC_AHBENR_DMA1EN;           // Enable DMA1
@@ -81,7 +83,7 @@ void CAP_Init(void){
     DMA1_Channel1->CCR =
             DMA_CCR_PL |        // Highest priority
             DMA_CCR_MSIZE_0 |   // 16bit Dst size
-            DMA_CCR_PSIZE_0 |   // 16bit src size
+            DMA_CCR_PSIZE_1 |   // 32bit src size
             DMA_CCR_MINC |      // increment memory pointer after transference
             DMA_CCR_TCIE;       // Enable end of transfer interrupt
 
@@ -105,6 +107,13 @@ void CAP_Init(void){
             ADC_CR2_EXTSEL_2 |              // Select Tim4_CH4 as Trigger source
             ADC_CR2_EXTSEL_0 |              //
             ADC_CR2_DMA;                    // Enable DMA Request
+    ADC1->CR1 = ADC_CR1_FAST_INTERLEAVED;   // Dual ADC, Fast interleaved mode
+    ADC2->CR2 = ADC_CR2_EXTTRIG  |
+    		    ADC_CR2_EXTSEL_2 |          // Select Ext for dual convertion
+				ADC_CR2_EXTSEL_1 |
+    		    ADC_CR2_EXTSEL_0 |
+				ADC_CR2_ADON;
+    ADC2->SQR3 = 0;							// Select AN channel 0
 
     HAL_NVIC_SetPriority(DMA1_Channel1_IRQn, 0, 0); // Highest priority
     NVIC_EnableIRQ(DMA1_Channel1_IRQn);
@@ -137,18 +146,20 @@ void CAP_Init(void){
 /**
  *
  */
-void CAP_SetSampleRate(uint32_t tb_us){
-    tb_us = tb_us/DSO_SAMPLES_PER_DIVISIO;
-    if(tb_us < CAPTURE_MIN_SAMPLE_TIME){
-        tb_us = CAPTURE_MIN_SAMPLE_TIME;
+void CAP_SetSampleRate(uint32_t sr){
+    if(sr < CAPTURE_MIN_SAMPLE_TIME){
+        sr = CAPTURE_MIN_SAMPLE_TIME;
     }
-    TIM4->ARR =  tb_us - 1;
-    TIM4->CCR4 = tb_us - 1;
+    TIM4->ARR =  sr - 1;
+    TIM4->CCR4 = sr - 1;
 }
 
 void CAP_Start(int16_t *dst, uint16_t size){
     done = OFF;
     triggered = OFF;
+
+    //size >>= 1;                            // Dual mode requires only half samples
+
     DMA1_Channel1->CNDTR = size;
     DMA1_Channel1->CMAR = (uint32_t)dst;
     DMA1_Channel1->CCR |= DMA_CCR_EN;
@@ -193,17 +204,3 @@ uint16_t CAP_GetTriggerIndex(){
     return OFF;
 }
 
-// Testing timebase
-void CAP_OutputTimeBase(void){
-    /* Configure Timer 4 */
-        RCC->APB1ENR |= RCC_APB1ENR_TIM4EN;     // Enable Timer 4
-        TIM4->CR1 = 0;                          // Stop timer
-        TIM4->CCMR2 = TIM_CCMR2_OC4M;           // Select PWM mode 2
-        TIM4->CCER = TIM_CCER_CC4E;             // enable compare output for CCR4
-        TIM4->PSC = (SystemCoreClock/CAPTURE_TIMER_CLOCK); // 4MHz clk => Max Ts = 0.250ns
-
-        /* Configure PB9 for alternate function */
-        GPIOB->CRH &= ~(0x0f<<4);
-        GPIOB->CRH &= ~(0x22<<4);
-
-}

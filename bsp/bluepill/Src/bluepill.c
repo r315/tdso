@@ -181,7 +181,6 @@ void Board_Init(void)
 #define DMA_CCR_PSIZE_8     (0<<8)
 
 void LCD_DMA_XFER(uint32_t count, uint16_t *data, uint8_t isbuf){
-	GPIOB->BRR = (1<<9);
 
     DMA1_Channel3->CMAR = (uint32_t)data;
     DMA1_Channel3->CCR =
@@ -235,8 +234,6 @@ void LCD_DMA_XFER(uint32_t count, uint16_t *data, uint8_t isbuf){
 	SPI1->CR1 &= ~(SPI_CR1_SPE | SPI_CR1_DFF);
 	SPI1->CR2 = 0;
 	SPI1->CR1 |= SPI_CR1_SPE;
-
-	GPIOB->BSRR = (1<<9);
 }
 
 

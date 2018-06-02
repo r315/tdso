@@ -53,8 +53,8 @@ int main(void){
             TEST_Run();
         }
     }else{
-        LCD_Rotation(LCD_LANDSCAPE);
-        //LCD_Rotation(LCD_REVERSE_LANDSCAPE);
+        //LCD_Rotation(LCD_LANDSCAPE);
+        LCD_Rotation(LCD_REVERSE_LANDSCAPE);
         DSO_Init();
         while(1){
           DSO_Run(ON);

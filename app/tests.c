@@ -108,14 +108,19 @@ void TEST_Config_DMA(void){
 void TEST_Enable_TIM4(uint16_t period){
 #define TIM4_CLK 2000000UL
 
-    RCC->APB1ENR |= RCC_APB1ENR_TIM4EN;
-    //TIM4->CR1 |= TIM_CR1_OPM;                 // set one pulse for testing
-    TIM4->CCMR2 |= TIM_CCMR2_OC4M;             // PWM mode 2
-    TIM4->CCER |= TIM_CCER_CC4E;                // enable compare output for CCR4
-    TIM4->PSC = (SystemCoreClock/TIM4_CLK);      // 2MHz clk
+    RCC->APB1ENR |= RCC_APB1ENR_TIM4EN;      // Enable Timer 4
+    TIM4->CR1 = 0;                           // Stop timer
+    //TIM4->CR1 |= TIM_CR1_OPM;                // set one pulse for testing
+    TIM4->CCMR2 |= TIM_CCMR2_OC4M;           // PWM mode 2
+    TIM4->CCER |= TIM_CCER_CC4E;             // enable compare output for CCR4
+    TIM4->PSC = (SystemCoreClock/TIM4_CLK);  // 2MHz clk, 4MHz clk => Max Ts = 0.250ns
 
     TIM4->ARR =  period<<1;
     TIM4->CCR4 = period;
+
+    /* Configure PB9 for alternate function */
+    GPIOB->CRH &= ~(0x0F<<4);
+    GPIOB->CRH |=  (0x0A<<4);
 
 }
 
