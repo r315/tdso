@@ -14,7 +14,7 @@ int16_t screenwave[DSO_GRID_W +1];
 
 static Dso dso;
 static const uint16_t tbases[] =  {10, 20, 50, 100, 200, 500, TB_1MS, 2000, 5000, 10000, 20000, 50000};  //us values
-static const uint16_t vscales[] = {VS_1V , 2000, 5000};//{10, 20, 50, 100, 200, 500, VS_1V , 2000, 5000};  //mV values
+static const uint16_t vscales[] = {500, VS_1V , 2000, 5000};//{10, 20, 50, 100, 200, 500, VS_1V , 2000, 5000};  //mV values
 
 static const uint8_t tgmodes[] = {TRIGGER_AUTO, TRIGGER_NORMAL, TRIGGER_SINGLE};
 static const uint8_t tgrisingedge[] = {TRIGGER_RISING_EDGE, 0x07,0x0B,0x1e,0x10,0x10,0x10,0x38,0x7c,0xfe,0x10,0x10,0x10,0xf0};
@@ -316,22 +316,24 @@ Channel *ch;
             default:
                 break;
         }
-    }
+    
 
-    ch = &dso.channels[dso.channel];
-    newpos = ch->pos + step;
+        ch = &dso.channels[dso.channel];
+        newpos = ch->pos + step;
 
-    if(newpos < -((DSO_GRID_H/2)) || newpos > ((DSO_GRID_H/2)))
-        return OFF;
+        if(newpos < -((DSO_GRID_H/2)) || newpos > ((DSO_GRID_H/2)))
+            return OFF;
 
-    LCD_FillRect((DSO_GRID_ORIGIN_X - 2 - DSO_CURSOR_W),
+        LCD_FillRect((DSO_GRID_ORIGIN_X - 2 - DSO_CURSOR_W),
                 DSO_CURSOR_ORIGIN + ch->pos,
                 DSO_CURSOR_W,
                 DSO_CURSOR_H,
                 DSO_BACKGROUND);
-    ch->pos = newpos;
+        ch->pos = newpos;
 
-    DSO_ChannelUpdateVpos(&dso, dso.channel, DSO_MAX_CHANNELS);
+        DSO_ChannelUpdateVpos(&dso, dso.channel, DSO_MAX_CHANNELS);
+        CONTROL_SetVpos(&dso.channels[dso.channel]);
+    }
     return OFF;
 }
 
@@ -384,7 +386,7 @@ uint16_t index;
         }
         dso.channels[dso.channel].scaleidx = index;
         DSO_ChannelUpdateVscale(&dso.channels[dso.channel]);
-        CONTROL_SelectScale(dso.channels[dso.channel].scaleidx);
+        CONTROL_SetGain(dso.channels[dso.channel].scaleidx);
 
     }
     return OFF;
@@ -720,8 +722,8 @@ int16_t p1, p2;
     p1 = map(ch->buffer[sindex] + DSO_ZERO_CAL, 0 , DSO_SAMPLE_MAX_VALUE, (DSO_GRID_H/2), -(DSO_GRID_H/2));        // map sample value to display grid
     p2 = map(ch->buffer[nextindex] + DSO_ZERO_CAL, 0 , DSO_SAMPLE_MAX_VALUE, (DSO_GRID_H/2), -(DSO_GRID_H/2));
     
-    p1 += ch->pos;      // add channel offset
-    p2 += ch->pos;
+    //p1 += ch->pos;      // add channel offset
+    //p2 += ch->pos;
 
     p1 = (p1 > (DSO_GRID_H/2)) ? (DSO_GRID_H/2) : p1;     // clip point1 top if off screen
     p1 = (p1 < -(DSO_GRID_H/2)) ? -(DSO_GRID_H/2) : p1;   // clip point bottom if off screen
@@ -785,8 +787,7 @@ void DSO_Init(void){
     
     LCD_Clear(DSO_BACKGROUND);
 
-    DSO_ClearGrid();
-    
+    DSO_ClearGrid();    
 
     dso.hpos = 0;
     DSO_DrawHpos(DSO_HPOS_W/2);
@@ -795,36 +796,33 @@ void DSO_Init(void){
     DSO_DrawTimeBase(&dso);
     
     dso.trigger.index = (DSO_GRID_W / 2);
-    dso.channel = DSO_SIGNAL0_CHANNEL;
-    
-    dso.trigger.pos = 0;
-    //dso.trigger.level = DSO_TGOFFSET_LEVEL;
+    dso.channel = DSO_SIGNAL0_CHANNEL;   
+   
     dso.trigger.color = ORANGE;
     dso.trigger.mode = TRIGGER_AUTO;
-    dso.trigger.edge = TRIGGER_RISING_EDGE;
+    dso.trigger.edge = TRIGGER_RISING_EDGE;    
+	dso.trigger.pos = 0;
     
     DSO_TriggerCursor(&dso.trigger);
 
     DSO_TriggerStatus(dso.trigger.mode);
     DSO_TriggerEdge((void*)tgrisingedge);
 
-    CONTROL_SetTriggerLevel(dso.trigger.pos);
-
-
     dso.channels[DSO_SIGNAL0_CHANNEL].pos = 0;
     dso.channels[DSO_SIGNAL0_CHANNEL].scaleidx = VS_1V_IDX;
     dso.channels[DSO_SIGNAL0_CHANNEL].color = YELLOW;
     dso.channels[DSO_SIGNAL0_CHANNEL].active = ON;
-    dso.channels[DSO_SIGNAL0_CHANNEL].buffer = samples;      //buffer
-    
-    DSO_ChannelUpdateVscale(&dso.channels[DSO_SIGNAL0_CHANNEL]);
-    CONTROL_SelectScale(dso.channels[DSO_SIGNAL0_CHANNEL].scaleidx);
+    dso.channels[DSO_SIGNAL0_CHANNEL].buffer = samples;      //buffer  
     
 #ifndef DSO_SINGLE_CHANNEL      
     dso.channels[1].cursor.pos = 0;
     dso.channels[1].cursor.color = BLUE;
     dso.channels[1].cursor.active = ON;    
 #endif
+
+    DSO_ChannelUpdateVscale(&dso.channels[DSO_SIGNAL0_CHANNEL]);
+
+    CONTROL_Init(&dso);
     
     DSO_ChannelUpdateVpos(&dso,DSO_SIGNAL0_CHANNEL, DSO_MAX_CHANNELS);
 

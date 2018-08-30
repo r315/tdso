@@ -134,7 +134,6 @@ typedef struct{         //
     int16_t pos;
     uint16_t color;
     uint8_t  mode;
-    uint16_t level;
     uint8_t edge;
     uint16_t index;     // sample index for trigger
 }Trigger;

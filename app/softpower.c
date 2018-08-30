@@ -15,6 +15,7 @@ extern ADC_HandleTypeDef hadc2;
 
 uint16_t SOFTPOWER_Read(void){
 	uint32_t adcResult = 0;
+	ADC2->SQR3 = 2;  //TODO...................
 	HAL_ADC_Start(&hadc2);
 
 	HAL_ADC_PollForConversion(&hadc2, 100);

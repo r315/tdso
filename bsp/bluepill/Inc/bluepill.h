@@ -74,32 +74,29 @@
 #define LCD_SDI_GPIO_Port GPIOA
 #define Trigger_IN_Pin GPIO_PIN_8
 #define Trigger_IN_GPIO_Port GPIOA
-#define TG_LEVEL_Pin GPIO_PIN_15
-#define TG_LEVEL_GPIO_Port GPIOA
 #define TST_SIG_Pin GPIO_PIN_0
 #define TST_SIG_GPIO_Port GPIOB
 #define LCD_RST_Pin GPIO_PIN_1
 #define LCD_RST_GPIO_Port GPIOB
+#define GAIN0_Pin GPIO_PIN_4
+#define GAIN1_Pin GPIO_PIN_5
 #define LCD_CD_Pin GPIO_PIN_10
 #define LCD_CD_GPIO_Port GPIOB
 #define LCD_LED_Pin GPIO_PIN_11
 #define LCD_LED_GPIO_Port GPIOB
-#define T2_Pin GPIO_PIN_13
+#define T1_Pin GPIO_PIN_9
+#define T1_GPIO_Port GPIOB
+#define T2_Pin GPIO_PIN_15
 #define T2_GPIO_Port GPIOB
+#define T3_Pin GPIO_PIN_13
+#define T3_GPIO_Port GPIOB
+#define T4_Pin GPIO_PIN_12
+#define T4_GPIO_Port GPIOB
 #define TT_Pin GPIO_PIN_14
 #define TT_GPIO_Port GPIOB
-#define T1_Pin GPIO_PIN_15
-#define T1_GPIO_Port GPIOB
 #define LED_Pin GPIO_PIN_3
 #define LED_GPIO_Port GPIOB
-#define SCALE0_Pin GPIO_PIN_4
-#define SCALE0_GPIO_Port GPIOB
-#define SCALE1_Pin GPIO_PIN_5
-#define SCALE1_GPIO_Port GPIOB
-#define MUL0_Pin GPIO_PIN_8
-#define MUL0_GPIO_Port GPIOB
-#define MUL1_Pin GPIO_PIN_9
-#define MUL1_GPIO_Port GPIOB
+
 
 /* USER CODE BEGIN Private defines */
 

@@ -5,30 +5,18 @@
  *      Author: hmr
  */
 
-#include "dso.h"
+
 #include "common.h"
 #include "control.h"
 #include "tdso_util.h"
 
 #if defined(__TDSO__)
-static const uint16_t sbitmap[] = {
-		/*(CONTROL_SWITCH_SCALE(SCALE_001) | CONTROL_SWITCH_MULTIPLIER(MULT_1)), // 10mV
-		(CONTROL_SWITCH_SCALE(SCALE_001) | CONTROL_SWITCH_MULTIPLIER(MULT_2)), // 20mV
-		(CONTROL_SWITCH_SCALE(SCALE_001) | CONTROL_SWITCH_MULTIPLIER(MULT_5)), // 50mV
-		(CONTROL_SWITCH_SCALE(SCALE_01) | CONTROL_SWITCH_MULTIPLIER(MULT_1)),  // 100mV
-		(CONTROL_SWITCH_SCALE(SCALE_01) | CONTROL_SWITCH_MULTIPLIER(MULT_2)),  // 200mV
-		(CONTROL_SWITCH_SCALE(SCALE_01) | CONTROL_SWITCH_MULTIPLIER(MULT_5)),  // 500mV */
-		(CONTROL_SWITCH_SCALE(SCALE_1) | CONTROL_SWITCH_MULTIPLIER(MULT_1)),   // 1V
-		(CONTROL_SWITCH_SCALE(SCALE_1) | CONTROL_SWITCH_MULTIPLIER(MULT_2)),   // 2V
-		(CONTROL_SWITCH_SCALE(SCALE_1) | CONTROL_SWITCH_MULTIPLIER(MULT_5))    // 5V
-};
 
+//TODO: COnfigure pins
 
-void CONTROL_SelectScale(uint8_t scale){
-	if(scale > (sizeof(sbitmap)/sizeof(uint16_t)))
-		return ;
-	//CONTROL_SET_SCALE(sbitmap[scale]);
-	CONTROL_SET_SCALE(0);
+void CONTROL_SetGain(uint8_t gain){
+	if(gain < CONTROL_GAIN_STAGES)
+		CONTROL_SET_GAIN(gain);
 }
 
 /*
@@ -36,8 +24,9 @@ void CONTROL_SelectScale(uint8_t scale){
  *
  */
 void CONTROL_SetTriggerLevel(int16_t level){
-    level += CONTROL_TGPWM_CALIBRATION;
-    TIM2->CCR1 = map(level, CONTROL_TGLEVEL_MIN, CONTROL_TGLEVEL_MAX, 0, CONTROL_TGPWM_STEPS);
+    TIM2->CCR1 = map(level + CONTROL_TGLEVEL_ZERO, 
+				CONTROL_TGLEVEL_MIN, CONTROL_TGLEVEL_MAX, 
+				CONTROL_TGLEVEL_PWM_MIN, CONTROL_TGLEVEL_PWM_MAX);
 }
 
 /*
@@ -45,6 +34,19 @@ void CONTROL_SetTriggerLevel(int16_t level){
  */
 void CONTROL_SetTriggerEdge(uint16_t edge){
 
+}
+
+
+void CONTROL_SetVpos(Channel *ch){
+	TIM2->CCR4 = map(ch->pos + CONTROL_VPOS_ZERO, 
+				CONTROL_VPOS_MIN, CONTROL_VPOS_MAX, 
+				CONTROL_VPOS_PWM_MIN, CONTROL_VPOS_PWM_MAX);
+}
+
+void CONTROL_Init(Dso *dso){
+	CONTROL_SetGain(dso->channels[DSO_SIGNAL0_CHANNEL].scaleidx);
+	CONTROL_SetTriggerLevel(dso->trigger.pos);
+	CONTROL_SetVpos(&dso->channels[DSO_SIGNAL0_CHANNEL]);
 }
 
 #elif defined(__EMU__)
