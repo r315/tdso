@@ -115,7 +115,7 @@ void CAP_Init(void){
 				ADC_CR2_ADON;
     ADC2->SQR3 = 0;							// Select AN channel 0
 
-    HAL_NVIC_SetPriority(DMA1_Channel1_IRQn, 0, 0); // Highest priority
+    NVIC_SetPriority(DMA1_Channel1_IRQn, 0); // Highest priority
     NVIC_EnableIRQ(DMA1_Channel1_IRQn);
 
 
@@ -157,8 +157,6 @@ void CAP_SetSampleRate(uint32_t sr){
 void CAP_Start(int16_t *dst, uint16_t size){
     done = OFF;
     triggered = OFF;
-
-    //size >>= 1;                            // Dual mode requires only half samples
 
     DMA1_Channel1->CNDTR = size;
     DMA1_Channel1->CMAR = (uint32_t)dst;
