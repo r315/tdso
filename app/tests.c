@@ -143,7 +143,7 @@ void TEST_MultiSwitch(){
         return;
     }
 
-    if(val & BUTTON_LEFT1){
+    if(val & BUTTON_LEFT){
         TEST_MultiSwitchFill(-50);
         return;
     }
@@ -153,7 +153,7 @@ void TEST_MultiSwitch(){
         return;
     }
 
-    if(val & BUTTON_RIGHT1){
+    if(val & BUTTON_RIGHT){
         TEST_MultiSwitchFill(50);
         return;
     }    

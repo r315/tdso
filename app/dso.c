@@ -310,6 +310,13 @@ Channel *ch;
             case BUTTON_RIGHT:
                  step = 1;
                  break;
+
+            case BUTTON_LEFT2:
+                 step = -4;
+                 break;
+            case BUTTON_RIGHT2:
+                 step = 4;
+                 break;
 #endif
             case BUTTON_A:
                 return ON;
@@ -595,6 +602,14 @@ int16_t newpos;
             case BUTTON_RIGHT:
                  step = 1;
                  break;
+
+            case BUTTON_LEFT2:
+            	step = -4;
+                 break;
+
+            case BUTTON_RIGHT2:
+                 step = 4;
+                 break;
 #endif
             case BUTTON_A:
                 return ON;
@@ -722,9 +737,6 @@ int16_t p1, p2;
     p1 = map(ch->buffer[sindex] + DSO_ZERO_CAL, 0 , DSO_SAMPLE_MAX_VALUE, (DSO_GRID_H/2), -(DSO_GRID_H/2));        // map sample value to display grid
     p2 = map(ch->buffer[nextindex] + DSO_ZERO_CAL, 0 , DSO_SAMPLE_MAX_VALUE, (DSO_GRID_H/2), -(DSO_GRID_H/2));
     
-    //p1 += ch->pos;      // add channel offset
-    //p2 += ch->pos;
-
     p1 = (p1 > (DSO_GRID_H/2)) ? (DSO_GRID_H/2) : p1;     // clip point1 top if off screen
     p1 = (p1 < -(DSO_GRID_H/2)) ? -(DSO_GRID_H/2) : p1;   // clip point bottom if off screen
 
@@ -755,7 +767,6 @@ uint16_t i, sidx;
     sidx += dso.hpos;
 
     for(i = 0; i < DSO_GRID_W; i++, sidx++){
-        //sidx &= ((DSO_MAX_SAMPLES/2) - 1);
         DSO_DrawGridSlice(screenwave[i], screenwave[i + 1], i);
         DSO_DrawSample(&dso.channels[0], sidx, i); 
         #ifndef DSO_SINGLE_CHANNEL
