@@ -74,6 +74,8 @@
 #define LCD_SDI_GPIO_Port GPIOA
 #define Trigger_IN_Pin GPIO_PIN_8
 #define Trigger_IN_GPIO_Port GPIOA
+#define TG_LEVEL_Pin GPIO_PIN_15
+#define TG_LEVEL_GPIO_Port GPIOA
 #define TST_SIG_Pin GPIO_PIN_0
 #define TST_SIG_GPIO_Port GPIOB
 #define LCD_RST_Pin GPIO_PIN_1

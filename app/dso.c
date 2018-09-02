@@ -748,9 +748,11 @@ uint16_t i, sidx;
     UTIL_StartTiming();
     sidx = CAP_GetTriggerIndex();
 
-    if(sidx != OFF){
+    if(sidx != 0){
         sidx -= DSO_MAX_SAMPLES/2;
     }
+
+    sidx += dso.hpos;
 
     for(i = 0; i < DSO_GRID_W; i++, sidx++){
         //sidx &= ((DSO_MAX_SAMPLES/2) - 1);
