@@ -18,7 +18,7 @@
 #define CONTROL_GAIN_BIT0		(1<<4)
 #define CONTROL_GAIN_BIT1		(1<<5)
 #define CONTROL_GAIN_MASK		(CONTROL_GAIN_BIT1 | CONTROL_GAIN_BIT0)
-#define CONTROL_SET_GAIN(x)		CONTROL_GAIN_PORT->BSRR = ((CONTROL_GAIN_MASK << 16) | (x << 4) & CONTROL_GAIN_MASK) // If both BSx and BRx are set, BSx has priority.
+#define CONTROL_SET_GAIN(x)		CONTROL_GAIN_PORT->BSRR = ((CONTROL_GAIN_MASK << 16) | ((x << 4) & CONTROL_GAIN_MASK)) // If both BSx and BRx are set, BSx has priority.
 
 #define CONTROL_TGLEVEL_ZERO	-2
 #define CONTROL_TGLEVEL_MIN     -100
