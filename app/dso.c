@@ -523,6 +523,14 @@ uint8_t DSO_SelectHpos(void *data){
                 case BUTTON_RIGHT:
                     DSO_MoveHpos(1);
                     break;
+
+                case BUTTON_LEFT2:
+                    DSO_MoveHpos(-4);
+                    break;
+
+                case BUTTON_RIGHT2:
+                    DSO_MoveHpos(4);
+                    break;
 #if defined(__BLUEBOARD__)
                 case BUTTON_UP:
                 case BUTTON_DOWN:
