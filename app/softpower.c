@@ -5,7 +5,7 @@
  *      Author: Hugo
  */
 
-#include <common.h>
+#include <libemb.h>
 #include <softpower.h>
 
 #if defined(__TDSO__)
@@ -35,6 +35,32 @@ uint16_t SOFTPOWER_Read(void){
 
 uint8_t SOFTPOWER_Pressed(void){
 return SOFTPOWER_Read() > SOFTPOWER_PRESSED_VALUE;
+}
+
+uint8_t SOFTPOWER_CheckStandby(void){
+static uint8_t state = OFF;
+static uint32_t ticks = 0;
+uint8_t pressed = SOFTPOWER_Pressed();
+
+	switch(state){
+		case OFF:
+			if(!pressed)
+				break;
+			state = ON;
+			ticks = GetTicks();
+			break;
+
+		case ON:
+			if(!pressed){
+				state = OFF;
+				break;
+			}
+			if(ElapsedTicks(ticks) > SOFTPOWER_STANDBY_TICKS){
+				return ON;
+			}
+			break;
+	}
+	return OFF;
 }
 
 void SOFTPOWER_PowerOff(void){

@@ -11,6 +11,7 @@
 #include <gpio.h>
 
 #define SOFTPOWER_PRESSED_VALUE 3000
+#define SOFTPOWER_STANDBY_TICKS 1500
 
 #if defined(__TDSO__)
 #define SOFTPOWER_PORT GPIOA
@@ -31,6 +32,11 @@ uint8_t SOFTPOWER_Pressed(void);
  * @brief powers down system when running on battery
  */
 void SOFTPOWER_PowerOff(void);
+
+/**
+ * @brief check if power button was pressed and handles hold for poweroff
+ * */
+uint8_t SOFTPOWER_CheckStandby(void);
 
 
 #endif /* SOFTPOWER_H_ */

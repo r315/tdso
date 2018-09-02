@@ -887,7 +887,7 @@ uint32_t btn;
 			default: break;
 		}
 
-		if(SOFTPOWER_Pressed()){
+		if(SOFTPOWER_CheckStandby()){
 			LCD_Clear(BLACK);
 			DISPLAY_SetColors(WHITE, BLACK);
 		    DISPLAY_Text(20,20, "Shuting Down!");
