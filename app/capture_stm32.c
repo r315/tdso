@@ -13,12 +13,17 @@ uint8_t done, triggered, flag;
 uint16_t ticks, samples;
 uint16_t trigger;
 
+/**
+ * Trigger interrupt handler
+ * */
 void TIM1_CC_IRQHandler(void){
+    // half of samples already aquired, enable trigger
     if(TIM1->SR & TIM_SR_CC2IF){
-        TIM1->CR1 |= TIM_CR1_OPM;           // Stop timer on capture
+        TIM1->CR1 |= TIM_CR1_OPM;                       // On capture event, stop timer
         TIM1->CCER = TIM_CCER_CC1E | TIM_CCER_CC1P;     // Enable capture on TI1
-    }else
-        if(TIM1->SR & TIM_SR_CC1IF){
+    }
+    // Trigger aquired, stop capture
+    else if(TIM1->SR & TIM_SR_CC1IF){
         TIM1->CR1 = 0;                      // Disable Timer
         TIM1->CCER = 0;                     // Disable compare/capture
         trigger = TIM1->CCR1;               // Get trigger index
@@ -27,6 +32,9 @@ void TIM1_CC_IRQHandler(void){
     TIM1->SR = OFF; // TODO : handle this correctly
 }
 
+/**
+ * DMA transfer end (all data) interrupt handler
+ * */
 void DMA1_Channel1_IRQHandler(void){
     CAP_Stop();
     DMA1->IFCR |= DMA_IFCR_CGIF1;  // Clear DMA Flags TODO: ADD DMA Error handling ?
