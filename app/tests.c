@@ -1,11 +1,9 @@
 
 
-#include <display.h>
-#include <softpower.h>
-#include <button.h>
 
+#include "softpower.h"
+#include "board.h"
 #include "led.h"
-#include "common.h"
 #include "control.h"
 
 static uint16_t vscales[] = {10, 20, 50, 100, 200, 500, 1000 , 2000, 5000};  //mV values
@@ -78,7 +76,7 @@ int8_t step = 0;
             default : return;
         }
        *selector += step;
-       CONTROL_SetVscale(*selector);
+       //CONTROL_SetVscale(*selector);
        DISPLAY_printf("%umV\n",vscales[*selector]);
     }
 }

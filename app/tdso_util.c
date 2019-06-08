@@ -1,23 +1,9 @@
-#include "lcd.h"
-#include "tdso_util.h"
+#include "board.h"
 #include "dso.h"
-#include "display.h"
+#include "tdso_util.h"
+
 
 volatile uint32_t time;
-
-
-
-#if defined(__TDSO__)
-#include "stm32f1xx_hal.h"
-
-void DelayMs(uint32_t ms){
-	HAL_Delay(ms);
-} 
-uint32_t GetTicks(void){
-return HAL_GetTick();
-} 
-
-#endif
 
 int32_t map(int32_t x, int32_t in_min, int32_t in_max, int32_t out_min, int32_t out_max){
   return ((x - in_min) * (out_max - out_min) / (in_max - in_min)) + out_min;
@@ -46,4 +32,11 @@ static uint8_t wps;
 		wps = 0;
 		ticks = GetTicks() + 1000;
 	}
+}
+
+
+
+uint32_t ElapsedTicks(uint32_t start_ticks){ 
+    uint32_t current = GetTicks(); 
+    return (current > start_ticks) ? current - start_ticks : 0xFFFFFFFF - start_ticks + current;
 }

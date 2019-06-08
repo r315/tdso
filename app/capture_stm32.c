@@ -4,7 +4,7 @@
 
 #include "dso.h"
 #include "capture.h"
-#include <common.h>
+#include <board.h>
 
 #define CAPTURE_TIMER_CLOCK 2000000UL   // Timer clock must me double due to ADC rising edge trigger
 #define CAPTURE_MIN_SAMPLE_TIME 2       // 2us

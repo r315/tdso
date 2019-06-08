@@ -6,7 +6,7 @@
  */
 
 
-#include "common.h"
+#include "board.h"
 #include "control.h"
 #include "tdso_util.h"
 

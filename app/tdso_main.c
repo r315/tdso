@@ -1,8 +1,5 @@
-
-#include <display.h>
-#include <button.h>
 #include "dso.h"
-#include "common.h"
+#include "board.h"
 
 
 #if defined(__EMU__)

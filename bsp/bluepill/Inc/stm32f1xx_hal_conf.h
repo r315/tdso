@@ -40,7 +40,7 @@
  extern "C" {
 #endif
 
-#include "bluepill.h"
+#include "board.h"
 /* Exported types ------------------------------------------------------------*/
 /* Exported constants --------------------------------------------------------*/
 

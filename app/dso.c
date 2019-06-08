@@ -1,7 +1,8 @@
 #include <string.h>
 #include <display.h>
 #include <button.h>
-#include <common.h>
+//#include <common.h>
+#include <board.h>
 #include <math.h>
 #include "dso.h"
 #include "tdso_util.h"

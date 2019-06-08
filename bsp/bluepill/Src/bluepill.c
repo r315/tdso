@@ -46,18 +46,12 @@
   ******************************************************************************
   */
 /* Includes ------------------------------------------------------------------*/
-#include "bluepill.h"
-#include "stm32f1xx_hal.h"
 #include "usb_device.h"
 
 /* USER CODE BEGIN Includes */
-
-#include <led.h>
-#include <display.h>
-#include "../app/dso.h"
+#include "board.h"
+#include "dso.h"
 #include "softpower.h"
-#include <spi.h>
-
 /* USER CODE END Includes */
 
 #if defined(LCD_DMA)
