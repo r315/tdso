@@ -3,7 +3,7 @@
 #########################################################
 TARGET =tdso
 PRJPATH =.
-OBJPATH =obj
+OBJPATH =build
 #LIBEMB_PATH = $(HOME)/Dropbox/Projects/software/libemb
 
 #Drivers/interface/src
@@ -17,7 +17,7 @@ $(LIBEMB_PATH)/drv/clock \
 INCSPATH =app \
 $(LIBEMB_PATH)/include
 
-CSRCS = button.c display.c lcd.c dso.c control.c softpower.c tdso_main.c tdso_util.c tests.c
+CSRCS = button.c display.c font.c lcd.c dso.c control.c softpower.c tdso_main.c tdso_util.c tests.c
 
 CFLAGS += -D__TDSO__
 
@@ -34,7 +34,7 @@ OBJCOPY = $(GCC_EXEC_PREFIX)-objcopy
 OBJDUMP = $(GCC_EXEC_PREFIX)-objdump
 DBG = $(GCC_EXEC_PREFIX)-insight
 JLINK =JLinkExe
-REMOVE = rm -f
+REMOVE = rm -fR
 ##########################################################
 
 OBJECTS =$(addprefix $(OBJPATH)/, $(CSRCS:.c=.o)) $(addprefix $(OBJPATH)/,$(ASRCS:.s=.o))
@@ -69,9 +69,12 @@ dis: $(TARGET).axf
 
 
 clean:
-	$(REMOVE) $(OBJECTS) $(XOBJS) $(TARGET) $(TARGET).exe $(TARGET).hex $(TARGET).axf *.bin libemu.a
+#$(REMOVE) $(OBJECTS) $(XOBJS) $(TARGET) $(TARGET).exe $(TARGET).hex $(TARGET).axf *.bin libemu.a
+	$(REMOVE) $(OBJPATH)
 	
-
+$(OBJPATH):
+	mkdir $@	
+	
 rebuild: clean all
 
 debug:	$(TARGET).axf
@@ -95,13 +98,15 @@ program: $(TARGET).axf $(TARGET).cfg
 	openocd -f $(TARGET).cfg -c "program $(TARGET).axf verify reset exit"
 
 
-$(OBJPATH)/%.o : %.c
+$(OBJPATH)/%.o : %.c | $(OBJPATH)
 	@echo "---- Compile" $< "---->" $@
 	@$(GCC) $(GCFLAGS) $(addprefix -I, $(INCSPATH)) $(addprefix -D, $(GCSYMBOLS))  -c $< -o $@
 	
 $(OBJPATH)/%.o : %.s
 	@echo "---- Assemble" $< "---->" $@
 	@$(AS) $(ASFLAGS) $< -o $@
+	
+
 ########################################################
 # Emulator make
 ########################################################
@@ -110,7 +115,7 @@ GPP = gcc
 XTARGET  =$(TARGET)
 XLIBPATH =.
 XOBJPATH =$(OBJPATH)
-XINCPATH =$(LIBEMB_PATH)/include app
+XINCPATH =$(LIBEMB_PATH)/include app bsp/emu
 
 XLIBEMU =libemu.a
 
@@ -123,7 +128,7 @@ ifeq ($(shell uname -s),Linux)
 XLIBS +=-lemu -lSDL2 -lm 
 
 $(XLIBEMU):
-	$(MAKE) -C $(LIBEMB_PATH)/lcdemulator lib
+	$(MAKE) -C $(LIBEMB_PATH)/lcdemulator APP_PATH=$(CURDIR)/bsp/emu lib 
 
 emulator: $(XTARGET)
 	./$(XTARGET)	
@@ -142,7 +147,7 @@ endif
 $(XTARGET): $(XOBJS) $(XLIBEMU)
 	$(GPP) $(XOBJS) $(XCFLAGS) $(addprefix -L, $(XLIBPATH)) $(XLIBS) -o $(XTARGET)
 
-$(XOBJPATH)/%.obj: %.c
+$(XOBJPATH)/%.obj: %.c | $(OBJPATH)
 	$(GPP) $(addprefix -I, $(XINCPATH)) $(XCFLAGS) -c $< -o $@
 	
 

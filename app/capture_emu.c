@@ -5,12 +5,11 @@
 #if defined(__EMU__)
 #include "dso.h"
 #include "capture.h"
-#include <common.h>
+#include "board.h"
+
+#include <math.h>
 
 volatile uint8_t done = 0;
-
-#include <SDL2/SDL.h>
-#include <math.h>
 
 #define FREQ 466
 #define AMP  1000

@@ -5,9 +5,9 @@
 extern "C" {
 #endif
 
-#include <display.h>
-#include <button.h>
+#include <lcd.h>
 #include <ili9341.h>
+#include <button.h>
 
 #include "stm32f1xx_hal.h"
 #include "stm32f1xx.h"
@@ -23,9 +23,9 @@ extern "C" {
 #define BUTTON_LEFT2	(BUTTON_LEFT | (1<<9))  
 #define BUTTON_RIGHT2	(BUTTON_RIGHT | (1<<12))
 
-#define BUTTON_Capture() (~GPIOB->IDR & BUTTON_MASK)
+#define BUTTON_HW_READ (~GPIOB->IDR & BUTTON_MASK)
+#define BUTTON_HW_INIT
 #define BUTTON_MASK (BUTTON_LEFT | BUTTON_RIGHT | BUTTON_A | BUTTON_LEFT2 | BUTTON_RIGHT2)
-#define BUTTON_Cfg()
 
 #define GetTicks HAL_GetTick
 #define DelayMs(_D) HAL_Delay(_D)

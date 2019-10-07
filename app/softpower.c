@@ -79,4 +79,5 @@ void SOFTPOWER_PowerOff(void){
 uint16_t SOFTPOWER_Read(void){ return 0; }
 uint8_t SOFTPOWER_Pressed(void){ return 0;}
 void SOFTPOWER_PowerOff(void){ }
+uint8_t SOFTPOWER_CheckStandby(void){return OFF;}
 #endif

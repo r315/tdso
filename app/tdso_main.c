@@ -1,5 +1,5 @@
 #include "dso.h"
-#include "board.h"
+#include <board.h>
 
 
 #if defined(__EMU__)
