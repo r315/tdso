@@ -1,7 +1,4 @@
 #include <string.h>
-#include <display.h>
-#include <button.h>
-//#include <common.h>
 #include <board.h>
 #include <math.h>
 #include "dso.h"
@@ -9,7 +6,6 @@
 #include "capture.h"
 #include "control.h"
 #include "softpower.h"
-#include "led.h"
 
 int16_t screenwave[DSO_GRID_W +1];
 
@@ -869,9 +865,9 @@ uint32_t btn;
                 if(CAP_IsEnded()){
                    DSO_DrawWaves(); 
                    if( CAP_Triggered()){
-                	   LED1_ON;
+                	   LED_ON;
                 	   DelayMs(10);
-                	   LED1_OFF;
+                	   LED_OFF;
                    }
                    CAP_Start(dso.channels[DSO_SIGNAL0_CHANNEL].buffer, DSO_MAX_SAMPLES );
                 }

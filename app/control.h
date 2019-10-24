@@ -8,7 +8,6 @@
 #ifndef _CONTROL_H_
 #define _CONTROL_H_
 
-#include <gpio.h>
 #include "dso.h"
 
 #if defined(__TDSO__)

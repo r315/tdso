@@ -8,7 +8,7 @@
 #ifndef SOFTPOWER_H_
 #define SOFTPOWER_H_
 
-#include <gpio.h>
+#include <stdint.h>
 
 #define SOFTPOWER_PRESSED_VALUE 3000
 #define SOFTPOWER_STANDBY_TICKS 1500

@@ -5,7 +5,7 @@
 #if defined(__BLUEBOARD__)
 #include "dso.h"
 #include "capture.h"
-#include <common.h>
+#include "board.h"
 
 volatile uint8_t done = 0;
 

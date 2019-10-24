@@ -1,8 +1,6 @@
 #ifndef _tdso_util_h_
 #define _tdso_util_h_
 
-//#include <common.h>
-
 void UTIL_StartTiming(void);
 void UTIL_StopTiming(void);
 void UTIL_wps(void);
