@@ -19,8 +19,6 @@ $(LIBEMB_PATH)/include
 
 CSRCS = button.c display.c font.c lcd.c dso.c control.c softpower.c tdso_main.c tdso_util.c tests.c
 
-CFLAGS += -D__TDSO__
-
 #########################################################
 # TOOLCHAIN
 #########################################################
@@ -40,7 +38,9 @@ REMOVE = rm -fR
 OBJECTS =$(addprefix $(OBJPATH)/, $(CSRCS:.c=.o)) $(addprefix $(OBJPATH)/,$(ASRCS:.s=.o))
 VPATH += $(CSRCPATH)
 
--include bsp/bluepill/sources.mk
+#-include bsp/bluepill/sources.mk
+#-include bsp/blueboard/sources.mk
+-include bsp/tdso/sources.mk
 
 all: $(TARGET).bin stats
 
@@ -92,7 +92,10 @@ flash: $(TARGET).jlink #tdso.bin #$(TARGET).bin
 
 $(TARGET).cfg:
 	@echo "Creating opencod configuration file"
-	echo "interface jlink\ntransport select swd\nsource [find target/stm32f1x.cfg]\nadapter_khz 4000" > $(TARGET).cfg
+	echo "interface jlink" > $(TARGET).cfg
+	echo "transport select swd" >> $(TARGET).cfg
+	echo "source [find target/stm32f1x.cfg]" >> $(TARGET).cfg
+	echo "adapter_khz 4000" >> $(TARGET).cfg
 
 program: $(TARGET).axf $(TARGET).cfg
 	openocd -f $(TARGET).cfg -c "program $(TARGET).axf verify reset exit"
