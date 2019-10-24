@@ -87,7 +87,7 @@ extern "C" {
 #define TB_1MS 					1000
 #define TB_1MS_IDX 				6
 #define VS_1V 1000
-#define VS_1V_IDX 				0//6
+#define VS_1V_IDX 				1
 
 #if defined(__LPCXpresso__)
 #define DSO_ADC_CHANNEL 		ADC_5

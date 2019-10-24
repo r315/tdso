@@ -790,7 +790,7 @@ void DSO_systemInfo(void){
 	DISPLAY_printf("Sample Memory: %u bytes\n",DSO_MAX_CHANNELS * DSO_MAX_SAMPLES);
    DISPLAY_printf("Version: %s\n",DSO_VERSION);
 #ifdef LCD_USE_ID
-	DISPLAY_printf("LCD ID: 0x%X\n",LCD_ReadID());
+	DISPLAY_printf("LCD ID: 0x%X\n",LCD_ReadId());
 #endif
 	LCD_Bkl(ON);
 	DelayMs(1000);
