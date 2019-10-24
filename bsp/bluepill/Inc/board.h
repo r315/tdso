@@ -35,6 +35,9 @@ extern "C" {
 #define BUTTON_HW_INIT
 #define BUTTON_MASK (BUTTON_LEFT | BUTTON_RIGHT | BUTTON_A | BUTTON_LEFT2 | BUTTON_RIGHT2)
 
+#define SOFTPOWER_PORT GPIOA
+#define SOFTPOWER_PIN  GPIO_PIN_2
+
 #define GetTicks HAL_GetTick
 #define DelayMs(_D) HAL_Delay(_D)
 uint32_t ElapsedTicks(uint32_t start);

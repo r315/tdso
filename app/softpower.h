@@ -13,11 +13,6 @@
 #define SOFTPOWER_PRESSED_VALUE 3000
 #define SOFTPOWER_STANDBY_TICKS 1500
 
-#if defined(__TDSO__)
-#define SOFTPOWER_PORT GPIOA
-#define SOFTPOWER_PIN  GPIO_PIN_2
-#endif
-
 /*
  * @brief get analog value from power button
  */
