@@ -1,11 +1,11 @@
 #########################################################
 # Board specific files
 #########################################################
-CSRCPATH +=bsp/blueboard bsp/blueboard/startup
-INCSPATH +=bsp/blueboard
-LDSCRIPT ="bsp/blueboard/startup/linker.ld"
+CSRCPATH +=$(LIBEMB_PATH)/bsp/blueboard $(LIBEMB_PATH)/bsp/blueboard/startup
+INCSPATH +=$(LIBEMB_PATH)/bsp/blueboard bsp/blueboard
+LDSCRIPT ="$(LIBEMB_PATH)/bsp/blueboard/lpc1768.ld"
 
-CSRCS +=blueboard.c ili9328.c startup.c #mystdlib.c
+CSRCS +=blueboard.c ili9328.c startup_lpc1768.c capture_bb.c #mystdlib.c
 
 GCSYMBOLS +=__BLUEBOARD__
 DEVICE  =LPC1768
