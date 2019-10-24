@@ -49,15 +49,11 @@ void CONTROL_Init(Dso *dso){
 	CONTROL_SetVpos(&dso->channels[DSO_SIGNAL0_CHANNEL]);
 }
 
-#elif defined(__EMU__)
+#else
 void CONTROL_Init(Dso *dso){}
 void CONTROL_SetGain(uint8_t gain){}
 void CONTROL_SelectScale(uint8_t scale){}
 void CONTROL_SetTriggerLevel(int16_t level){}
 void CONTROL_SetTriggerEdge(uint16_t edge) {}
 void CONTROL_SetVpos(Channel *ch){}
-#elif defined(__BLUEBOARD__)
-void CONTROL_SelectScale(uint8_t scale){}
-void CONTROL_SetTriggerLevel(int16_t level){}
-void CONTROL_SetTriggerEdge(uint16_t edge) {}
 #endif

@@ -2,7 +2,6 @@
  * 
  * */
 
-#if defined(__EMU__)
 #include "dso.h"
 #include "capture.h"
 #include "board.h"
@@ -91,4 +90,4 @@ return 0;
 uint8_t CAP_Triggered(void){
 return 0;
 }
-#endif
+
