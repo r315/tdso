@@ -1,7 +1,7 @@
 #########################################################
 # project files
 #########################################################
-TARGET =tdso
+TARGET =$(OBJPATH)/tdso
 PRJPATH =.
 OBJPATH =build
 #LIBEMB_PATH = $(HOME)/Dropbox/Projects/software/libemb
@@ -122,10 +122,10 @@ XLIBEMU =libemu.a
 XCSRC =tdso_main.c dso.c capture_emu.c tdso_util.c control.c softpower.c
 XOBJS = $(addprefix $(XOBJPATH)/, $(XCSRC:.c=.obj))
 
-XCFLAGS =-Wall -D__EMU__
+XCFLAGS =-Wall
 
 ifeq ($(shell uname -s),Linux)
-XLIBS +=-lemu -lSDL2 -lm 
+XLIBS +=$(shell sdl2-config --libs) -lemu -lm 
 
 $(XLIBEMU):
 	$(MAKE) -C $(LIBEMB_PATH)/lcdemulator APP_PATH=$(CURDIR)/bsp/emu lib 

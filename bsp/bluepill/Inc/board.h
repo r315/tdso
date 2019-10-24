@@ -5,12 +5,20 @@
 extern "C" {
 #endif
 
+#define __BLUEPILL__
+
 #include <lcd.h>
 #include <ili9341.h>
 #include <button.h>
+#include <display.h>
 
-#include "stm32f1xx_hal.h"
 #include "stm32f1xx.h"
+#include "stm32f1xx_hal.h"
+
+#define GPIO_Set(port, pinmask) port->BSRR = pinmask
+#define GPIO_Clr(port, pinmask) port->BRR = pinmask
+#define GPIO_Read(port) port->IDR
+#define GPIO_Write(port) port->ODR
 
 /**
  * HW symbols for button handling
@@ -18,7 +26,7 @@ extern "C" {
 #define BUTTON_LEFT  	(1<<15)
 #define BUTTON_RIGHT 	(1<<13)
 #define BUTTON_CENTER	(1<<14)
-#define BUTTON_A 		  BUTTON_CENTER
+#define BUTTON_A        BUTTON_CENTER
 
 #define BUTTON_LEFT2	(BUTTON_LEFT | (1<<9))  
 #define BUTTON_RIGHT2	(BUTTON_RIGHT | (1<<12))
@@ -29,6 +37,8 @@ extern "C" {
 
 #define GetTicks HAL_GetTick
 #define DelayMs(_D) HAL_Delay(_D)
+uint32_t ElapsedTicks(uint32_t start);
+
 
 /**
 * @brief Lcd Pin configuration:
@@ -140,7 +150,6 @@ extern "C" {
 
 void _Error_Handler(char *, int);
 void Board_Init(void);
-uint32_t ElapsedTicks(uint32_t start_ticks);
 uint16_t SPI_Send(uint16_t data);
 
 #define Error_Handler() _Error_Handler(__FILE__, __LINE__)

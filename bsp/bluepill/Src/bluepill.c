@@ -46,12 +46,8 @@
   ******************************************************************************
   */
 /* Includes ------------------------------------------------------------------*/
-#include "usb_device.h"
-
 /* USER CODE BEGIN Includes */
 #include "board.h"
-#include "dso.h"
-#include "softpower.h"
 /* USER CODE END Includes */
 
 #if defined(LCD_DMA)
@@ -102,6 +98,10 @@ void TEST_Run(void);
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
+uint32_t ElapsedTicks(uint32_t start_ticks){ 
+    uint32_t current = GetTicks(); 
+    return (current > start_ticks) ? current - start_ticks : 0xFFFFFFFF - start_ticks + current;
+}
 
 /* USER CODE END 0 */
 

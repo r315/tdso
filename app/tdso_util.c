@@ -34,9 +34,3 @@ static uint8_t wps;
 	}
 }
 
-
-
-uint32_t ElapsedTicks(uint32_t start_ticks){ 
-    uint32_t current = GetTicks(); 
-    return (current > start_ticks) ? current - start_ticks : 0xFFFFFFFF - start_ticks + current;
-}
