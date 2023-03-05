@@ -7,10 +7,9 @@ extern "C" {
 
 #define __BLUEPILL__
 
-#include <lcd.h>
-#include <ili9341.h>
-#include <button.h>
-#include <display.h>
+#include "lcd.h"
+#include "ili9341.h"
+#include "button.h"
 
 #include "stm32f1xx.h"
 #include "stm32f1xx_hal.h"

@@ -7,13 +7,13 @@ int main(int argc, char *argv[]){
 
 unsigned int uitime = 0;
 
-	DISPLAY_Init(ON);
+	LIB2D_Init();
 
 	LCD_Clear(BLACK);
 
 	//LCD_Rotation(LCD_LANDSCAPE);
 
-	//DISPLAY_SetFont(FONT_PIXELDUST);
+	//LIB2D_SetFont(FONT_PIXELDUST);
 	
 	DSO_Init();
 
@@ -36,21 +36,22 @@ void TEST_Run(void);
 int main(void){
 
 	Board_Init();
+    LIB2D_Init();
+    LCD_Clear(LCD_BLACK);
 
-    LCD_Init();
-    LCD_Clear(BLACK);
-
+    BUTTON_Init(200);
+    
     BUTTON_Read();
 
     if(BUTTON_GetEvents() == BUTTON_PRESSED && BUTTON_GetValue() == BUTTON_CENTER){
         TEST_BlinkLed(3);
-        DISPLAY_printf("Entering Test mode\n");
+        LIB2D_Print("Entering Test mode\n");
         LCD_Bkl(ON);
         while(1){
             TEST_Run();
         }
     }else{
-        LCD_Rotation(LCD_LANDSCAPE);
+        LCD_SetOrientation(LCD_LANDSCAPE);
         //LCD_Rotation(LCD_REVERSE_LANDSCAPE);
         DSO_Init();
         while(1){

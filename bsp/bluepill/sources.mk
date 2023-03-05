@@ -46,11 +46,11 @@ ASRCS +=startup_stm32f103xb.s
 LDSCRIPT ="bsp/bluepill/startup/STM32F103C8Tx_FLASH.ld"
 
 DEVICE =STM32F103xB
-GCSYMBOLS +=__TDSO__ $(DEVICE) USE_HAL_DRIVER __weak='__attribute__((weak))' __packet='__attribute__((__packed__))' LCD_DMA
+GCSYMBOLS +=__TDSO__ $(DEVICE) USE_HAL_DRIVER __weak='__attribute__((weak))' __packet='__attribute__((__packed__))'
 #########################################################
 #Startup files and libraries
 #########################################################
-GCFLAGS =-mcpu=cortex-m3 -mthumb -mfloat-abi=soft -Og -g3 -Wall -fmessage-length=0 -ffunction-sections
+GCFLAGS =-mcpu=cortex-m3 -mthumb -mfloat-abi=soft -O0 -g3 -Wall -fmessage-length=0 -ffunction-sections
 LDFLAGS =-mcpu=cortex-m3 -mthumb -mfloat-abi=soft -Wl,--gc-sections
 #LIBS =-nostdlib -lgcc #-lc -lnosys
 

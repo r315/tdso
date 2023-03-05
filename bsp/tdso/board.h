@@ -5,12 +5,14 @@
 extern "C" {
 #endif
 
+#ifndef __TDSO__
 #define __TDSO__
+#endif
 
 #include <lcd.h>
 #include <ili9341.h>
 #include <button.h>
-#include <display.h>
+#include "lib2d.h"
 
 #include "stm32f1xx_hal.h"
 #include "stm32f1xx.h"
@@ -38,11 +40,11 @@ extern "C" {
 #define SOFTPOWER_PORT GPIOA
 #define SOFTPOWER_PIN  GPIO_PIN_2
 
-#define GetTicks HAL_GetTick
+#define GetTick HAL_GetTick
 #define DelayMs(_D) HAL_Delay(_D)
 
 static inline uint32_t ElapsedTicks(uint32_t start_ticks){ 
-    uint32_t current = GetTicks(); 
+    uint32_t current = GetTick(); 
     return (current > start_ticks) ? current - start_ticks : 0xFFFFFFFF - start_ticks + current;
 }
 

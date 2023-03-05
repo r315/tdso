@@ -1,10 +1,5 @@
 #include "board.h"
-
-#if defined(LCD_DMA)
-void LCD_Fill_DMA(uint32_t count, uint16_t color);
-void LCD_Fill_Data_DMA(uint32_t count, uint16_t *data);
-void SPI_Init_DMA(void);
-#endif
+#include "spi.h"
 
 /* Private variables ---------------------------------------------------------*/
 ADC_HandleTypeDef hadc1;
@@ -13,13 +8,13 @@ DMA_HandleTypeDef hdma_adc1;
 
 I2C_HandleTypeDef hi2c1;
 
-SPI_HandleTypeDef hspi1;
-
 TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim4;
 
 UART_HandleTypeDef huart1;
+
+static spibus_t spibus;
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
@@ -32,7 +27,6 @@ static void MX_GPIO_Init(void);
 static void MX_DMA_Init(void);
 static void MX_ADC1_Init(void);
 static void MX_I2C1_Init(void);
-static void MX_SPI1_Init(void);
 static void MX_TIM2_Init(void);
 static void MX_TIM3_Init(void);
 static void MX_ADC2_Init(void);
@@ -85,12 +79,10 @@ void Board_Init(void)
   MX_ADC2_Init();
   //MX_USB_DEVICE_Init();
   //MX_TIM4_Init();
-  MX_SPI1_Init();
-
-  #if defined(LCD_DMA)
-   SPI_Init_DMA();
-  #endif
-
+  spibus.bus = SPI_BUS0;
+  spibus.freq = 1000;
+  spibus.flags = SPI_HW_CS;
+  SPI_Init(&spibus);
   /* USER CODE BEGIN 2 */
 
   HAL_TIM_Base_Start(&htim3);
@@ -102,112 +94,10 @@ void Board_Init(void)
   HAL_TIM_Base_Start(&htim2);
   HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_4); //start Test signal
 
-  //HAL_SPI_Transmit(&hspi1, (uint8_t*)&hspi1, 1, 10);
-
   ADC_Enable(&hadc2); // enable soft power button adc
 
+  LCD_Init(&spibus);
 }
-
-/**
- * Spi functions using DMA
- */ 
-
-#if defined(LCD_DMA)
-#define DMA_CCR_PL_Medium   (1<<12)
-#define DMA_CCR_MSIZE_8     (0<<10)
-#define DMA_CCR_MSIZE_16    (1<<10)
-#define DMA_CCR_MSIZE_32    (2<<10)
-#define DMA_CCR_PSIZE_16    (1<<8)
-#define DMA_CCR_PSIZE_8     (0<<8)
-
-void LCD_DMA_XFER(uint32_t count, uint16_t *data, uint8_t isbuf){
-
-    DMA1_Channel3->CMAR = (uint32_t)data;
-    DMA1_Channel3->CCR =
-       		DMA_CCR_PL_Medium |   // priority
-   			DMA_CCR_MSIZE_16  |   // 16bit src size
-   			DMA_CCR_PSIZE_16  |   // 16bit dst size
-   			DMA_CCR_DIR       ;   // Read from Memory
-
-    if(isbuf){
-    	 DMA1_Channel3->CCR |= DMA_CCR_MINC;
-    }
-
-    // Configure Spi for 16bit DMA
-   	SPI1->CR1 &= ~SPI_CR1_SPE;
-    SPI1->CR2 |= SPI_CR2_TXDMAEN;
-    SPI1->CR1 |= SPI_CR1_DFF | SPI_CR1_SPE;
-
-    // DMA only supports transfers of 65536
-    while(count > 0x10000){
-    	DMA1_Channel3->CNDTR = 0xFFFF;
-    	DMA1_Channel3->CCR |= DMA_CCR_EN;
-    	 while(!(DMA1->ISR & DMA_ISR_TCIF3)){
-    	    }
-    	DMA1->IFCR = DMA_IFCR_CGIF3;
-
-    	 DMA1_Channel3->CCR &= ~DMA_CCR_EN;
-    	 count -= 0x10000;
-    }
-
-    // Send the remaining
-    if(count){
-		DMA1_Channel3->CNDTR = count;
-		DMA1_Channel3->CCR |= DMA_CCR_EN;
-
-		while((DMA1->ISR & DMA_ISR_TCIF3) == 0 );
-
-		DMA1->IFCR = DMA_IFCR_CGIF3;
-		//DMA1_Channel3->CCR &= ~DMA_CCR_EN;
-		 DMA1_Channel3->CCR =
-		    		DMA_CCR_PL_Medium |
-					DMA_CCR_MSIZE_8  |
-					DMA_CCR_PSIZE_8  |
-					DMA_CCR_DIR;
-
-		// wait for last transfer
-		while((SPI1->SR & SPI_SR_TXE) == 0 );
-		while((SPI1->SR & SPI_SR_BSY) != 0 );
-    }
-
-    // Restore 8bit Spi
-	SPI1->CR1 &= ~(SPI_CR1_SPE | SPI_CR1_DFF);
-	SPI1->CR2 = 0;
-	SPI1->CR1 |= SPI_CR1_SPE;
-}
-
-
-void LCD_Fill_DMA(uint32_t count, uint16_t color){
-	LCD_DMA_XFER(count, &color, OFF);
-}
-
-
-void LCD_Fill_Data_DMA(uint32_t count, uint16_t *data){
-	LCD_DMA_XFER(count, data, ON);
-}
-
-void SPI_Init_DMA(void){
-  SPI1->CR1 |= SPI_CR1_SPE;
-	SPI_Send(0xFF);
-
-  DMA1_Channel3->CPAR = (uint32_t)&SPI1->DR;
-  DMA1_Channel3->CCR = DMA_CCR_PL_Medium |
-              DMA_CCR_MSIZE_8  |
-              DMA_CCR_PSIZE_8  |
-              DMA_CCR_DIR;
-}
-
-uint16_t SPI_Send(uint16_t data){
-	SPI1->DR = data;
-	while((SPI1->SR & SPI_SR_TXE) == 0 );
-	while((SPI1->SR & SPI_SR_BSY) != 0 );
-  return SPI1->DR;
-}
-#else
-uint16_t SPI_Send(uint16_t data){                
-  HAL_SPI_Transmit(&hspi1, &data, 1, 10);
-} 
-#endif /* __TDSO__ */
 
 /** System Clock Configuration
 */
@@ -366,28 +256,6 @@ static void MX_I2C1_Init(void)
 
 }
 
-/* SPI1 init function */
-static void MX_SPI1_Init(void)
-{
-
-  hspi1.Instance = SPI1;
-  hspi1.Init.Mode = SPI_MODE_MASTER;
-  hspi1.Init.Direction = SPI_DIRECTION_2LINES;
-  hspi1.Init.DataSize = SPI_DATASIZE_8BIT;
-  //hspi1.Init.CLKPolarity = SPI_POLARITY_HIGH;
-  //hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
-  hspi1.Init.NSS = SPI_NSS_SOFT;
-  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_16;
-  hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
-  hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
-  hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
-  hspi1.Init.CRCPolynomial = 10;
-  if (HAL_SPI_Init(&hspi1) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }
-
-}
 
 /* TIM2 init function */
 static void MX_TIM2_Init(void)
@@ -533,7 +401,7 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOC_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(LCD_CS_GPIO_Port, LCD_CS_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(LCD_CS_GPIO_Port, LCD_CS_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, LCD_RST_Pin|LCD_CD_Pin|LCD_LED_Pin|LED_Pin, GPIO_PIN_RESET);
@@ -568,5 +436,14 @@ static void MX_GPIO_Init(void)
    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_MEDIUM;
    HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
+   GPIO_InitStruct.Pin = LCD_SCK_Pin|LCD_SDI_Pin;
+   GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+   GPIO_InitStruct.Pin = LCD_SDO_Pin;
+   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+   GPIO_InitStruct.Pull = GPIO_NOPULL;
+   HAL_GPIO_Init(LCD_SDO_GPIO_Port, &GPIO_InitStruct);
 }
 

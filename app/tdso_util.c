@@ -10,13 +10,13 @@ int32_t map(int32_t x, int32_t in_min, int32_t in_max, int32_t out_min, int32_t 
 }
 
 void UTIL_StartTiming(void){
-	time = GetTicks();
+	time = GetTick();
 }
 
 void UTIL_StopTiming(void){
-	 time = GetTicks() - time;
-    DISPLAY_GotoAbsolute(DSO_GRID_ORIGIN_X + 2, DSO_GRID_ORIGIN_Y + 2);
-	 DISPLAY_printf("%ums",time);
+	time = GetTick() - time;
+    LIB2D_SetPos(DSO_GRID_ORIGIN_X + 2, DSO_GRID_ORIGIN_Y + 2);
+	LIB2D_Print("%ums",time);
 }
 
 
@@ -24,13 +24,13 @@ void UTIL_wps(void){
 static uint32_t ticks;
 static uint8_t wps;
 
-	if(GetTicks() < ticks){
+	if(GetTick() < ticks){
 		wps++;
 	}else{
-      DISPLAY_GotoAbsolute(DSO_GRID_ORIGIN_X + 2, DSO_GRID_ORIGIN_Y + 12);
-		DISPLAY_printf("%uwps  ", wps);
+    	LIB2D_SetPos(DSO_GRID_ORIGIN_X + 2, DSO_GRID_ORIGIN_Y + 12);
+		LIB2D_Print("%uwps   ", wps);
 		wps = 0;
-		ticks = GetTicks() + 1000;
+		ticks = GetTick() + 1000;
 	}
 }
 

@@ -25,15 +25,15 @@ static uint32_t time;
 uint16_t pbutton = SOFTPOWER_Read();
     if(pbutton > SOFTPOWER_PRESSED_VALUE){
         if(ElapsedTicks(time) > 500){
-            DISPLAY_printf("\nGoing to power down in 1S");
+            LIB2D_Print("\nGoing to power down in 1S");
             DelayMs(1000);
             SOFTPOWER_PowerOff();
         }
         DelayMs(100);
-        DISPLAY_Goto(0,SOFT_SWITCH_Y);
-		DISPLAY_printf("AN2: %4u\n", pbutton);		
+        LIB2D_SetCursor(0,SOFT_SWITCH_Y);
+		LIB2D_Print("AN2: %4u\n", pbutton);		
     }else{
-        time = GetTicks();
+        time = GetTick();
     }
 }
 
@@ -55,7 +55,7 @@ char *btn = "";
 	}else if(event == BUTTON_RELEASED){
 			btn = "       ";
 	}
-    DISPLAY_printf("%s", btn);
+    LIB2D_Print("%s", btn);
 }
 
 //--------------------------------------------------------
@@ -76,7 +76,7 @@ int8_t step = 0;
         }
        *selector += step;
        //CONTROL_SetVscale(*selector);
-       DISPLAY_printf("%umV\n",vscales[*selector]);
+       LIB2D_Print("%umV\n",vscales[*selector]);
     }
 }
 
@@ -84,9 +84,9 @@ int8_t step = 0;
 #define SWITCH_BAR_HIGHT    20
 #define SWITCH_BAR_X        ((LCD_GetWidth()/2) - (SWITCH_BAR_WIDTH / 2))
 #define SWITCH_BAR_Y        20
-#define SWITCH_BAR_BORDER_COLOR RED
-#define SWITCH_BAR_COLOR        BLUE
-#define SWITCH_BAR_BACK_COLOR   BLACK
+#define SWITCH_BAR_BORDER_COLOR LCD_RED
+#define SWITCH_BAR_COLOR        LCD_BLUE
+#define SWITCH_BAR_BACK_COLOR   LCD_BLACK
 
 void TEST_MultiSwitchFill(int32_t percent){
     if(percent > 100 || percent < -100){
@@ -132,8 +132,8 @@ void TEST_MultiSwitch(){
    
     val = BUTTON_GetValue();
 
-    DISPLAY_Goto(0, SWITCH_BAR_Y);
-    DISPLAY_printf("%4X", val);
+    LIB2D_SetCursor(0, SWITCH_BAR_Y);
+    LIB2D_Print("%4X", val);
 
     if(val & BUTTON_LEFT2){
         TEST_MultiSwitchFill(-100);

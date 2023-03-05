@@ -9,3 +9,4 @@ libemb/
 obj/
 test/
 Debug/
+build/

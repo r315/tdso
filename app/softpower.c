@@ -48,7 +48,7 @@ uint8_t pressed = SOFTPOWER_Pressed();
 			if(!pressed)
 				break;
 			state = ON;
-			ticks = GetTicks();
+			ticks = GetTick();
 			break;
 
 		case ON:

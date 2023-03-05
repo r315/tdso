@@ -7,7 +7,6 @@
 #include "control.h"
 #include "softpower.h"
 
-int16_t screenwave[DSO_GRID_W +1];
 
 static Dso dso;
 static const uint16_t tbases[] =  {10, 20, 50, 100, 200, 500, TB_1MS, 2000, 5000, 10000, 20000, 50000};  //us values
@@ -17,9 +16,9 @@ static const uint8_t tgmodes[] = {TRIGGER_AUTO, TRIGGER_NORMAL, TRIGGER_SINGLE};
 static const uint8_t tgrisingedge[] = {TRIGGER_RISING_EDGE, 0x07,0x0B,0x1e,0x10,0x10,0x10,0x38,0x7c,0xfe,0x10,0x10,0x10,0xf0};
 static const uint8_t tgfallingedge[] = {TRIGGER_FALLING_EDGE, 0x07,0x0B,0xf0,0x10,0x10,0x10,0xfe,0x7c,0x38,0x10,0x10,0x10,0x1e};
 static const uint8_t schannels[] = {DSO_SIGNAL0_CHANNEL};
-
- 
-int16_t samples[DSO_MAX_SAMPLES];
+static int16_t samples[DSO_MAX_SAMPLES];
+static int16_t screenwave[DSO_GRID_W + 1];
+static uint16_t vslice[DSO_GRID_H];
 
 uint8_t DSO_ShowMenu(Menu *dm);
 void DSO_HideMenu(Menu *dm);
@@ -50,10 +49,10 @@ Menu triggermenu = {
   .h = sizeof(tmenu)/sizeof(Menuentry) * DSO_MENU_ITEM_SPACING,
   .items = tmenu,
   .nitems = sizeof(tmenu)/sizeof(Menuentry),
-  .fcolor = WHITE,
-  .bcolor = RGB(8,16,8),
-  .sfcolor = WHITE,
-  .sbcolor = RGB(6,18,19),
+  .fcolor = LCD_WHITE,
+  .bcolor = RGB565(8,16,8),
+  .sfcolor = LCD_WHITE,
+  .sbcolor = RGB565(6,18,19),
   .select = 0,
   .visible = OFF
 };
@@ -73,10 +72,10 @@ Menu mainmenu = {
   .h = sizeof(fmenu)/sizeof(Menuentry) * DSO_MENU_ITEM_SPACING,
   .items = fmenu,
   .nitems = sizeof(fmenu)/sizeof(Menuentry),
-  .fcolor = WHITE,
-  .bcolor = RGB(8,16,8),
-  .sfcolor = WHITE,
-  .sbcolor = RGB(6,18,19),
+  .fcolor = LCD_WHITE,
+  .bcolor = RGB565(8,16,8),
+  .sfcolor = LCD_WHITE,
+  .sbcolor = RGB565(6,18,19),
   .select = 0,
   .visible = OFF
 };
@@ -123,87 +122,60 @@ void DSO_DrawHpos(uint8_t hp){
  /**
   *
   **/
-void DSO_DrawGridSlice(int16_t p1, int16_t p2, uint16_t index){
-uint16_t dy; 
+void DSO_DrawGridSlice(int16_t y1, int16_t y2, uint16_t x){
+    uint16_t dy;
+    uint16_t *pvslice = vslice;
+    int16_t sy;
 
-    if(p1 > p2){
-        dy = p2;
-        p2 = p1;
-        p1 = dy;
+    if(y1 > y2){
+        dy = y2;
+        y2 = y1;
+        y1 = dy;
     }
     
-    dy = p2 - p1;
+    dy = y2 - y1;
     
-    dy = (dy > DSO_GRID_H)? DSO_GRID_H : dy;
+    dy = (dy > DSO_GRID_H) ? DSO_GRID_H : dy;
     
-    p1 = (p1 < -(DSO_GRID_H/2)) ? -(DSO_GRID_H/2) : p1;    // clip to window
-    p2 = (p2 >  (DSO_GRID_H/2)) ? (DSO_GRID_H/2) : p2;
-    
-    LCD_Window(index + DSO_GRID_ORIGIN_X, p1 + DSO_GRID_CENTER, 1, (dy > 0) ? dy + 1 :1);
-	#if defined(__TDSO__)
-    LCD_CS0;
-	#endif
-    
-    if( ((index % (DSO_GRID_W / DSO_GRID_H_DIVISIONS)) == 0) ||
-            index == ((DSO_GRID_W /2) - 1) || index == ((DSO_GRID_W /2) + 1)){  
+    y1 = (y1 < -(DSO_GRID_H/2)) ? -(DSO_GRID_H/2) : y1;    // clip to window
+    y2 = (y2 >  (DSO_GRID_H/2)) ? (DSO_GRID_H/2) : y2;
+    sy = y1;
+        
+    if( ((x % (DSO_GRID_W / DSO_GRID_H_DIVISIONS)) == 0) ||
+            x == ((DSO_GRID_W /2) - 1) || x == ((DSO_GRID_W /2) + 1)){  
         //vertical grid rule
-        while(p1 <= p2 ){
-            if(((p1 % DSO_GRID_DOT_SPACE) == 0) || 
-                ( ((p1 == -1) || (p1 == 1)) && (index != ((DSO_GRID_W/2) -1)) && (index != ((DSO_GRID_W/2)) +1) )){
-				#if defined(__TDSO__)
-                SPI_Send(DSO_GRID_COLOR>>8);
-                SPI_Send(DSO_GRID_COLOR);
-				#else
-				LCD_Data(DSO_GRID_COLOR);
-				#endif
-            }else{
-				#if defined(__TDSO__)
-            	SPI_Send(BLACK>>8);
-            	SPI_Send(BLACK);
-				#else
-				LCD_Data(BLACK);
-				#endif
+        while(y1 <= y2 ){
+            if(((y1 % DSO_GRID_DOT_SPACE) == 0) || 
+                ( ((y1 == -1) || (y1 == 1)) && (x != ((DSO_GRID_W/2) -1)) && (x != ((DSO_GRID_W/2)) +1) )){				
+				*pvslice = DSO_GRID_COLOR;
+            }else{							
+                *pvslice = LCD_BLACK;
             }
-            p1++;
+            y1++;
+            pvslice++;
+        }
+    }else if((x % DSO_GRID_DOT_SPACE) == 0){
+        //horizontal grid rule
+        while(y1 <= y2 ){
+            if(((y1 % (DSO_GRID_H / DSO_GRID_V_DIVISIONS)) == 0) ||
+                    (y1 == -1) || (y1 == 1)){				
+                *pvslice = DSO_GRID_COLOR;
+            }else{					
+                *pvslice = LCD_BLACK;
+            }
+            y1++;
+            pvslice++;
         }
     }else{
-        if( ((index % DSO_GRID_DOT_SPACE) == 0) ){
-            //horizontal grid rule
-            while(p1 <= p2 ){
-                if(((p1 % (DSO_GRID_H / DSO_GRID_V_DIVISIONS)) == 0) ||
-                     (p1 == -1) || (p1 == 1)){
-					#if defined(__TDSO__)
-                	SPI_Send(DSO_GRID_COLOR>>8);
-                	SPI_Send(DSO_GRID_COLOR);
-					#else
-					LCD_Data(DSO_GRID_COLOR);
-					#endif
-                }else{
-					#if defined(__TDSO__)
-                	SPI_Send(BLACK>>8);
-                	SPI_Send(BLACK);
-					#else
-					LCD_Data(BLACK);
-					#endif
-                }
-                p1++;
-            }
-        }else{
-            // no grid rule
-            while(p1 <= p2 ){
-				#if defined(__TDSO__)
-            	SPI_Send(BLACK>>8);
-            	SPI_Send(BLACK);
-				#else
-				LCD_Data(BLACK);
-				#endif
-                p1++;
-            }
+        // no grid rule
+        while(y1 <= y2){				
+            *pvslice = LCD_BLACK;
+            y1++;
+            pvslice++;
         }
     }
-	#if defined(__TDSO__)
-    LCD_CS1;
-	#endif
+
+    LCD_WriteArea(x + DSO_GRID_ORIGIN_X, sy + DSO_GRID_CENTER, 1, (dy > 0) ? dy + 1 : 1, vslice);
 }
 
 void DSO_DrawGridHline(uint16_t y){
@@ -240,19 +212,13 @@ uint8_t hspace = DSO_GRID_W / DSO_GRID_H_DIVISIONS, vspace = DSO_GRID_H / DSO_GR
     DSO_DrawGridHline((DSO_GRID_H/2) - 1);          //X axis Highlight
     DSO_DrawGridHline((DSO_GRID_H/2) + 1);
     
-    LCD_Rect(DSO_GRID_ORIGIN_X - 1, DSO_GRID_ORIGIN_Y - 1, DSO_GRID_W + 1, DSO_GRID_H + 1, DSO_FRAME_COLOR);    //Outside frame
+    LCD_Rect(DSO_GRID_ORIGIN_X - 1, DSO_GRID_ORIGIN_Y - 1, DSO_GRID_W + 1, DSO_GRID_H + 1, DSO_GRID_FRAME_COLOR);    //Outside frame
 }
 
-void DSO_ClearGrid(void){
-
-#if 1   
-    LCD_FillRect(DSO_GRID_ORIGIN_X, DSO_GRID_ORIGIN_Y, DSO_GRID_W, DSO_GRID_H, BLACK);  
+void DSO_ClearGrid(void)
+{
+    LCD_FillRect(DSO_GRID_ORIGIN_X, DSO_GRID_ORIGIN_Y, DSO_GRID_W, DSO_GRID_H, LCD_BLACK);  
     DSO_DrawGrid();
-#else
-    for(i = 0; i< DSO_GRID_W; i++)
-        DSO_DrawGridSlice(-(DSO_GRID_H/2),(DSO_GRID_H/2),i);
-#endif
-    
 }
 
 /**
@@ -344,24 +310,24 @@ Channel *ch;
 uint16_t DSO_ChannelUpdateVscale(Channel *ch){
 uint16_t scale = vscales[ch->scaleidx];
 
-    DISPLAY_SetFcolor(DSO_TRACE_COLOR);    
+    LIB2D_SetFcolor(DSO_TRACE_COLOR);    
     LCD_FillRoundRect(
             DSO_VSCALE_DRO_X,
             DSO_VSCALE_DRO_Y,
-            DISPLAY_GetFontWidth() * DSO_VSCALE_DRO_W,
-            DISPLAY_GetFontHeight() + DSO_VSCALE_DRO_H,
-            BLACK);
+            LIB2D_GetFontWidth() * DSO_VSCALE_DRO_W,
+            LIB2D_GetFontHeight() + DSO_VSCALE_DRO_H,
+            LCD_BLACK);
              
-    DISPLAY_GotoAbsolute(
-    		DSO_VSCALE_DRO_X + DISPLAY_GetFontWidth(),
+    LIB2D_SetPos(
+    		DSO_VSCALE_DRO_X + LIB2D_GetFontWidth(),
             DSO_VSCALE_DRO_Y + DSO_VSCALE_DRO_H/2);
 
-    DISPLAY_SetColors(ch->color, BLACK);
+    LIB2D_SetColors(ch->color, LCD_BLACK);
 
     if(scale < VS_1V){
-        DISPLAY_printf("%umV",scale);
+        LIB2D_Print("%umV",scale);
     }else{
-        DISPLAY_printf("%uV", scale/VS_1V);
+        LIB2D_Print("%uV", scale/VS_1V);
     }
     return scale;
 }
@@ -403,28 +369,28 @@ uint16_t x,y;
     y = dm->y + DSO_GRID_ORIGIN_Y;    
     
     if( selected ){
-        DISPLAY_SetFcolor(dm->sfcolor);
-        DISPLAY_SetBcolor(dm->sbcolor);
+        LIB2D_SetFcolor(dm->sfcolor);
+        LIB2D_SetBcolor(dm->sbcolor);
         LCD_FillRect(x,         
                      y + DSO_MENU_TOP_PADDING - 1 +
-                    ((DISPLAY_GetFontHeight() + DSO_MENU_TOP_PADDING) * item),
+                    ((LIB2D_GetFontHeight() + DSO_MENU_TOP_PADDING) * item),
                     dm->w,
-                    DISPLAY_GetFontHeight() + 2,
+                    LIB2D_GetFontHeight() + 2,
                     dm->sbcolor);
     }else{
-        DISPLAY_SetFcolor(dm->fcolor);
-        DISPLAY_SetBcolor(dm->bcolor);
+        LIB2D_SetFcolor(dm->fcolor);
+        LIB2D_SetBcolor(dm->bcolor);
         LCD_FillRect(x,         
                      y + DSO_MENU_TOP_PADDING -1 +
-                    ((DISPLAY_GetFontHeight() + DSO_MENU_TOP_PADDING) * item),
+                    ((LIB2D_GetFontHeight() + DSO_MENU_TOP_PADDING) * item),
                     dm->w,
-                    DISPLAY_GetFontHeight() + 2,
+                    LIB2D_GetFontHeight() + 2,
                     dm->bcolor);
     }
     
-    DISPLAY_Text(x + DSO_MENU_LEFT_PADDING,         
+    LIB2D_Text(x + DSO_MENU_LEFT_PADDING,         
                  y + DSO_MENU_TOP_PADDING + 
-                 ((DISPLAY_GetFontHeight() + 
+                 ((LIB2D_GetFontHeight() + 
                  DSO_MENU_TOP_PADDING) * item),
                  dm->items[item].name);
 }
@@ -433,9 +399,9 @@ uint8_t DSO_ShowMenu(Menu *dm){
 int8_t i;  
 
 //printf("draw menu %u\n", dm->x);
-//DISPLAY_SetFont(corrierFont);
+//LIB2D_SetFont(corrierFont);
     if(!dm->visible){
-        //dm->h = dm->nitems * (DISPLAY_GetFontHeight() + DSO_MENU_ITEM_SPACING);
+        //dm->h = dm->nitems * (LIB2D_GetFontHeight() + DSO_MENU_ITEM_SPACING);
         LCD_FillRect(dm->x + DSO_GRID_ORIGIN_X,
                      dm->y + DSO_GRID_ORIGIN_Y,
                      dm->w, dm->h, dm->bcolor);
@@ -468,10 +434,10 @@ int8_t i;
                 return OFF;
         }             
         DSO_DrawMenuItem(dm, dm->select, ON);
-        DISPLAY_SetBcolor(BLACK);
+        LIB2D_SetBcolor(LCD_BLACK);
     }  
      
-//DISPLAY_SetFont(defaultFont);  
+//LIB2D_SetFont(defaultFont);  
     return OFF;
 }
 
@@ -491,20 +457,20 @@ uint16_t timebase = tbases[ds->timebase];
     LCD_FillRoundRect(
             DSO_TIMEBASE_DRO_X,
             DSO_TIMEBASE_DRO_Y    ,
-            DISPLAY_GetFontWidth() * DSO_TIMEBASE_DRO_W,
-            DISPLAY_GetFontHeight() + DSO_TIMEBASE_DRO_H,
-            BLACK);
+            LIB2D_GetFontWidth() * DSO_TIMEBASE_DRO_W,
+            LIB2D_GetFontHeight() + DSO_TIMEBASE_DRO_H,
+            LCD_BLACK);
              
-    DISPLAY_GotoAbsolute(
-    		DSO_TIMEBASE_DRO_X + DISPLAY_GetFontWidth(),
+    LIB2D_SetPos(
+    		DSO_TIMEBASE_DRO_X + LIB2D_GetFontWidth(),
             DSO_TIMEBASE_DRO_Y + DSO_TIMEBASE_DRO_H/2);
 
-    DISPLAY_SetColors(DSO_DEFAULT_COLOR, BLACK);
+    LIB2D_SetColors(DSO_DEFAULT_COLOR, LCD_BLACK);
 
     if(timebase < TB_1MS){
-        DISPLAY_printf("%uus", timebase);
+        LIB2D_Print("%uus", timebase);
     }else{
-        DISPLAY_printf("%ums", timebase/TB_1MS);
+        LIB2D_Print("%ums", timebase/TB_1MS);
     }
     return timebase;
 }
@@ -667,17 +633,17 @@ uint8_t i, iw, ih, r, *icon = (uint8_t*)(data + DSO_ICON_DATA_OFFSET);
             DSO_TGMODE_DRO_Y,
             DSO_TGMODE_DRO_W,
             DSO_TGMODE_DRO_H,
-            BLACK);
+            LCD_BLACK);
 
-    LCD_Window(DSO_TGEDGE_DRO_X, DSO_TGEDGE_DRO_Y, iw, ih);
+    //LCD_Window(DSO_TGEDGE_DRO_X, DSO_TGEDGE_DRO_Y, iw, ih);
 
     while(ih--){
         r = *icon++;
         for(i=0; i < iw; i++){
-            if(r & (0x80>>i))
-                LCD_Data(DSO_TG_EDGE_COLOR);
-            else
-                LCD_Data(BLACK);
+            //if(r & (0x80>>i))
+                //LCD_Data(DSO_TG_EDGE_COLOR);
+            //else
+                //LCD_Data(BLACK);
         }
     }
 
@@ -693,13 +659,13 @@ char *st;
             DSO_TGSWEEP_DRO_Y,
             DSO_TGSWEEP_DRO_W,
             DSO_TGSWEEP_DRO_H,
-            BLACK);
+            LCD_BLACK);
 
-    DISPLAY_SetFcolor(DSO_TGSWEEP_DRO_COLOR);
+    LIB2D_SetFcolor(DSO_TGSWEEP_DRO_COLOR);
 
     switch(tgs & (TRIGGER_STATUS_MASK | TRIGGER_MODE_MASK)){
         case TRIGGER_STOP:
-            DISPLAY_SetFcolor(RED);
+            LIB2D_SetFcolor(LCD_RED);
             st = "STOP";
             break;
         case TRIGGER_READY:
@@ -715,7 +681,7 @@ char *st;
         default:
             return;
     }
-    DISPLAY_Text(DSO_TGSWEEP_DRO_X + 6, DSO_TGSWEEP_DRO_Y + 2, st);
+    LIB2D_Text(DSO_TGSWEEP_DRO_X + 6, DSO_TGSWEEP_DRO_Y + 2, st);
 }
 
 void DSO_TriggerInfo(Trigger *tg){
@@ -734,9 +700,10 @@ Menuentry *entry;
     return OFF;
 }
 
-void DSO_DrawSample(Channel *ch, uint16_t sindex, uint16_t index){
-uint16_t nextindex = (sindex + 1) & (DSO_MAX_SAMPLES - 1);
-int16_t p1, p2;
+void DSO_DrawSample(Channel *ch, uint16_t sindex, uint16_t x){
+    uint16_t nextindex = (sindex + 1) & (DSO_MAX_SAMPLES - 1);
+    int16_t p1, p2;
+
     sindex = sindex & (DSO_MAX_SAMPLES - 1);
 
     p1 = map(ch->buffer[sindex] + DSO_ZERO_CAL, 0 , DSO_SAMPLE_MAX_VALUE, (DSO_GRID_H/2), -(DSO_GRID_H/2));        // map sample value to display grid
@@ -745,16 +712,16 @@ int16_t p1, p2;
     p1 = (p1 > (DSO_GRID_H/2)) ? (DSO_GRID_H/2) : p1;     // clip point1 top if off screen
     p1 = (p1 < -(DSO_GRID_H/2)) ? -(DSO_GRID_H/2) : p1;   // clip point bottom if off screen
 
-    screenwave[index] = p1;    
+    screenwave[x] = p1;    
 
     if( p1 == p2){
-        LCD_Pixel(index + DSO_GRID_ORIGIN_X, p1 + DSO_GRID_CENTER, ch->color);
+        LCD_Pixel(x + DSO_GRID_ORIGIN_X, p1 + DSO_GRID_CENTER, ch->color);
     }
     else{
         p2 = (p2 > (DSO_GRID_H/2)) ? (DSO_GRID_H/2) : p2;   // clip point2 top
         p2 = (p2 < -(DSO_GRID_H/2)) ? -(DSO_GRID_H/2) : p2; // clip point2 bottom
-        LCD_Line(index + DSO_GRID_ORIGIN_X, DSO_GRID_CENTER + p1, 
-                 index + DSO_GRID_ORIGIN_X, DSO_GRID_CENTER + p2, 
+        LCD_Line(x + DSO_GRID_ORIGIN_X, DSO_GRID_CENTER + p1, 
+                 x + DSO_GRID_ORIGIN_X, DSO_GRID_CENTER + p2, 
                  ch->color);
     }
 }
@@ -783,25 +750,21 @@ uint16_t i, sidx;
     UTIL_wps();
 }
 
-
-
-void DSO_systemInfo(void){
-	DISPLAY_printf("System Clock: %uHz\n", SystemCoreClock);
-	DISPLAY_printf("Sample Memory: %u bytes\n",DSO_MAX_CHANNELS * DSO_MAX_SAMPLES);
-   DISPLAY_printf("Version: %s\n",DSO_VERSION);
+void DSO_SystemInfo(void){
+	LIB2D_Print("System Clock: %uHz\n", SystemCoreClock);
+	LIB2D_Print("Sample Memory: %u bytes\n",DSO_MAX_CHANNELS * DSO_MAX_SAMPLES);
+    LIB2D_Print("Version: %s\n", DSO_VERSION);
 #ifdef LCD_USE_ID
-	DISPLAY_printf("LCD ID: 0x%X\n",LCD_ReadId());
+	LIB2D_Print("LCD ID: 0x%X\n",LCD_ReadId());
 #endif
 	LCD_Bkl(ON);
-	DelayMs(1000);
+	DelayMs(2000);
     LCD_Bkl(OFF);
 }
 
 void DSO_Init(void){
 
-	DSO_systemInfo();
-
-    BUTTON_SetHoldTime(200);        
+	DSO_SystemInfo();       
     
     LCD_Clear(DSO_BACKGROUND);
 
@@ -816,7 +779,7 @@ void DSO_Init(void){
     dso.trigger.index = (DSO_GRID_W / 2);
     dso.channel = DSO_SIGNAL0_CHANNEL;   
    
-    dso.trigger.color = ORANGE;
+    dso.trigger.color = LCD_ORANGE;
     dso.trigger.mode = TRIGGER_AUTO;
     dso.trigger.edge = TRIGGER_RISING_EDGE;    
 	dso.trigger.pos = 0;
@@ -828,7 +791,7 @@ void DSO_Init(void){
 
     dso.channels[DSO_SIGNAL0_CHANNEL].pos = 0;
     dso.channels[DSO_SIGNAL0_CHANNEL].scaleidx = VS_1V_IDX;
-    dso.channels[DSO_SIGNAL0_CHANNEL].color = YELLOW;
+    dso.channels[DSO_SIGNAL0_CHANNEL].color = LCD_YELLOW;
     dso.channels[DSO_SIGNAL0_CHANNEL].active = ON;
     dso.channels[DSO_SIGNAL0_CHANNEL].buffer = samples;      //buffer  
     
@@ -859,7 +822,7 @@ void DSO_Run(uint8_t doloop){
 uint32_t ticks;
 uint32_t btn;
 	do{
-      ticks = GetTicks();	   
+      ticks = GetTick();	   
 		switch(dso.trigger.mode){
 			case TRIGGER_AUTO:              // display signal even if trigger not present
                 if(CAP_IsEnded()){
@@ -906,9 +869,9 @@ uint32_t btn;
 		}
 
 		if(SOFTPOWER_CheckStandby()){
-			LCD_Clear(BLACK);
-			DISPLAY_SetColors(WHITE, BLACK);
-		    DISPLAY_Text(20,20, "Shuting Down!");
+			LCD_Clear(LCD_BLACK);
+			LIB2D_SetColors(LCD_WHITE, LCD_BLACK);
+		    LIB2D_Text(20,20, "Shuting Down!");
 		    DelayMs(2000);
 		    SOFTPOWER_PowerOff();
 		}

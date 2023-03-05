@@ -1,23 +1,18 @@
 #########################################################
 # project files
 #########################################################
-TARGET =$(OBJPATH)/tdso
+TARGET =tdso
 PRJPATH =.
-OBJPATH =build
-#LIBEMB_PATH = $(HOME)/Dropbox/Projects/software/libemb
+BUILD_DIR =build
 
 #Drivers/interface/src
 CSRCPATH =app \
-$(LIBEMB_PATH)/drv/lcd \
-$(LIBEMB_PATH)/button \
-$(LIBEMB_PATH)/drv/tft \
-$(LIBEMB_PATH)/display \
-$(LIBEMB_PATH)/drv/clock \
+
 
 INCSPATH =app \
-$(LIBEMB_PATH)/include
+$(DRIVER_PATH)/include \
 
-CSRCS = button.c display.c font.c lcd.c dso.c control.c softpower.c tdso_main.c tdso_util.c tests.c
+CSRCS = button.c lib2d.c font.c lcd.c dso.c control.c softpower.c tdso_main.c tdso_util.c tests.c
 
 #########################################################
 # TOOLCHAIN
@@ -35,7 +30,7 @@ JLINK =JLinkExe
 REMOVE = rm -fR
 ##########################################################
 
-OBJECTS =$(addprefix $(OBJPATH)/, $(CSRCS:.c=.o)) $(addprefix $(OBJPATH)/,$(ASRCS:.s=.o))
+OBJECTS =$(addprefix $(BUILD_DIR)/, $(CSRCS:.c=.o)) $(addprefix $(BUILD_DIR)/,$(ASRCS:.s=.o))
 VPATH += $(CSRCPATH)
 
 #-include bsp/bluepill/sources.mk
@@ -47,7 +42,7 @@ all: $(TARGET).bin stats
 	
 $(TARGET).axf:  $(OBJECTS)
 	@echo "---- Linking ---->" $@
-	$(GCC) $(LDFLAGS) -T$(LDSCRIPT) $(addprefix -L, $(LIBSPATH)) -o "$(TARGET).axf" $(OBJECTS) $(LIBS)
+	@$(GCC) $(LDFLAGS) -T$(LDSCRIPT) $(addprefix -L, $(LIBSPATH)) -o "$(TARGET).axf" $(OBJECTS) $(LIBS)
 #arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -mfloat-abi=soft -T"../STM32F103C8Tx_FLASH.ld" -Wl,-Map=output.map -Wl,--gc-sections -o "TDSO.elf" @"objects.list"   -lm
 
 $(TARGET).hex: $(TARGET).axf
@@ -57,7 +52,7 @@ $(TARGET).bin: $(TARGET).axf
 	@$(OBJCOPY) -O binary -j .text -j .data $(TARGET).axf $(TARGET).bin
 
 stats: $(TARGET).axf
-	@echo "\n---- Sections Summary ---"
+	@echo "---- Sections Summary ---"
 	@$(SIZE) -A -x $<
 	@$(SIZE) -t  $<
 
@@ -70,9 +65,9 @@ dis: $(TARGET).axf
 
 clean:
 #$(REMOVE) $(OBJECTS) $(XOBJS) $(TARGET) $(TARGET).exe $(TARGET).hex $(TARGET).axf *.bin libemu.a
-	$(REMOVE) $(OBJPATH)
+	$(REMOVE) $(BUILD_DIR)
 	
-$(OBJPATH):
+$(BUILD_DIR):
 	mkdir $@	
 	
 rebuild: clean all
@@ -101,11 +96,11 @@ program: $(TARGET).axf $(TARGET).cfg
 	openocd -f $(TARGET).cfg -c "program $(TARGET).axf verify reset exit"
 
 
-$(OBJPATH)/%.o : %.c | $(OBJPATH)
+$(BUILD_DIR)/%.o : %.c | $(BUILD_DIR)
 	@echo "---- Compile" $< "---->" $@
 	@$(GCC) $(GCFLAGS) $(addprefix -I, $(INCSPATH)) $(addprefix -D, $(GCSYMBOLS))  -c $< -o $@
 	
-$(OBJPATH)/%.o : %.s
+$(BUILD_DIR)/%.o : %.s
 	@echo "---- Assemble" $< "---->" $@
 	@$(AS) $(ASFLAGS) $< -o $@
 	
@@ -117,13 +112,13 @@ GPP = gcc
 
 XTARGET  =$(TARGET)
 XLIBPATH =.
-XOBJPATH =$(OBJPATH)
+XBUILD_DIR =$(BUILD_DIR)
 XINCPATH =$(LIBEMB_PATH)/include app bsp/emu
 
 XLIBEMU =libemu.a
 
 XCSRC =tdso_main.c dso.c capture_emu.c tdso_util.c control.c softpower.c
-XOBJS = $(addprefix $(XOBJPATH)/, $(XCSRC:.c=.obj))
+XOBJS = $(addprefix $(XBUILD_DIR)/, $(XCSRC:.c=.obj))
 
 XCFLAGS =-Wall
 
@@ -150,7 +145,7 @@ endif
 $(XTARGET): $(XOBJS) $(XLIBEMU)
 	$(GPP) $(XOBJS) $(XCFLAGS) $(addprefix -L, $(XLIBPATH)) $(XLIBS) -o $(XTARGET)
 
-$(XOBJPATH)/%.obj: %.c | $(OBJPATH)
+$(XBUILD_DIR)/%.obj: %.c | $(BUILD_DIR)
 	$(GPP) $(addprefix -I, $(XINCPATH)) $(XCFLAGS) -c $< -o $@
 	
 
