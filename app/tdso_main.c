@@ -30,7 +30,7 @@ unsigned int uitime = 0;
     return 0;
 }
 #else
-void TEST_BlinkLed(uint8_t times);
+
 void TEST_Run(void);
 
 int main(void){
@@ -40,16 +40,12 @@ int main(void){
     LCD_Clear(LCD_BLACK);
 
     BUTTON_Init(200);
-    
+
     BUTTON_Read();
 
-    if(BUTTON_GetEvents() == BUTTON_PRESSED && BUTTON_GetValue() == BUTTON_CENTER){
-        TEST_BlinkLed(3);
-        LIB2D_Print("Entering Test mode\n");
-        LCD_Bkl(ON);
-        while(1){
-            TEST_Run();
-        }
+    if(BUTTON_GetEvents() == BUTTON_PRESSED && BUTTON_GetValue() == BUTTON_CENTER){                
+        LCD_Bkl(ON);        
+        TEST_Run(); // Doesn't return        
     }else{
         LCD_SetOrientation(LCD_LANDSCAPE);
         //LCD_Rotation(LCD_REVERSE_LANDSCAPE);

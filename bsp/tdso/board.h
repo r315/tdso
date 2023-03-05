@@ -30,8 +30,8 @@ extern "C" {
 #define BUTTON_CENTER   (1<<14)
 #define BUTTON_A        BUTTON_CENTER
 
-#define BUTTON_LEFT2	(BUTTON_LEFT | (1<<9))  
-#define BUTTON_RIGHT2	(BUTTON_RIGHT | (1<<12))
+#define BUTTON_LEFT2	(1<<9)
+#define BUTTON_RIGHT2	(1<<12)
 
 #define BUTTON_HW_READ  (~GPIOB->IDR & BUTTON_MASK)
 #define BUTTON_HW_INIT

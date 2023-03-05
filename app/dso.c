@@ -1,11 +1,11 @@
 #include <string.h>
-#include <board.h>
+#include "board.h"
 #include <math.h>
 #include "dso.h"
 #include "tdso_util.h"
 #include "capture.h"
 #include "control.h"
-#include "softpower.h"
+#include "power.h"
 
 
 static Dso dso;
@@ -622,7 +622,7 @@ uint8_t DSO_TriggerMode(void *data){
 }
 
 uint8_t DSO_TriggerEdge(void *data){
-uint8_t i, iw, ih, r, *icon = (uint8_t*)(data + DSO_ICON_DATA_OFFSET);
+    uint8_t i, iw, ih, r, *icon = (uint8_t*)(data + DSO_ICON_DATA_OFFSET);
     iw = *((uint8_t*)(data + DSO_ICON_W_OFFSET));
     ih = *((uint8_t*)(data + DSO_ICON_H_OFFSET));
 
@@ -635,17 +635,17 @@ uint8_t i, iw, ih, r, *icon = (uint8_t*)(data + DSO_ICON_DATA_OFFSET);
             DSO_TGMODE_DRO_H,
             LCD_BLACK);
 
-    //LCD_Window(DSO_TGEDGE_DRO_X, DSO_TGEDGE_DRO_Y, iw, ih);
+    
+    uint16_t *pdata = vslice;
 
-    while(ih--){
+    for(uint8_t j = 0; j < ih; j++){
         r = *icon++;
-        for(i=0; i < iw; i++){
-            //if(r & (0x80>>i))
-                //LCD_Data(DSO_TG_EDGE_COLOR);
-            //else
-                //LCD_Data(BLACK);
+        for(i = 0; i < iw ; i++){
+            *pdata++ = (r & (0x80 >> i)) ? DSO_TG_EDGE_COLOR : LCD_BLACK;
         }
     }
+
+    LCD_WriteArea(DSO_TGEDGE_DRO_X, DSO_TGEDGE_DRO_Y, iw, ih, vslice);
 
     CONTROL_SetTriggerEdge(dso.trigger.edge);
     dso.activeControl = DSO_SelectTbase;
@@ -868,12 +868,12 @@ uint32_t btn;
 			default: break;
 		}
 
-		if(SOFTPOWER_CheckStandby()){
+		if(POWER_EnterStandby()){
 			LCD_Clear(LCD_BLACK);
 			LIB2D_SetColors(LCD_WHITE, LCD_BLACK);
 		    LIB2D_Text(20,20, "Shuting Down!");
 		    DelayMs(2000);
-		    SOFTPOWER_PowerOff();
+		    POWER_PowerOff();
 		}
       
 		BUTTON_Read();

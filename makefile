@@ -12,7 +12,7 @@ CSRCPATH =app \
 INCSPATH =app \
 $(DRIVER_PATH)/include \
 
-CSRCS = button.c lib2d.c font.c lcd.c dso.c control.c softpower.c tdso_main.c tdso_util.c tests.c
+CSRCS = button.c lib2d.c font.c lcd.c dso.c control.c power.c tdso_main.c tdso_util.c tests.c
 
 #########################################################
 # TOOLCHAIN

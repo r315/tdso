@@ -19,7 +19,6 @@ void UTIL_StopTiming(void){
 	LIB2D_Print("%ums",time);
 }
 
-
 void UTIL_wps(void){
 static uint32_t ticks;
 static uint8_t wps;

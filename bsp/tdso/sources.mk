@@ -32,7 +32,7 @@ $(BSP_PATH)/Drivers/CMSIS/Include \
 $(BSP_PATH)/Drivers/CMSIS/Device/ST/STM32F1xx/Include \
 
 CSRCS += \
-tdso.c \
+board_tdso.c \
 system_stm32f1xx.c \
 stm32f1xx_it.c \
 stm32f1xx_hal_dma.c \

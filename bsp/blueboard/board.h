@@ -1,7 +1,7 @@
 #ifndef _board_h_
 #define _board_h_
 
-#include <blueboard.h>
+#include "blueboard.h"
 
 #define BUTTON_LEFT2	(BUTTON_LEFT | (1<<9))  
 #define BUTTON_RIGHT2	(BUTTON_RIGHT | (1<<12))

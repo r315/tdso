@@ -1,11 +1,19 @@
-
-
-
-#include "softpower.h"
 #include "board.h"
+#include "power.h"
 #include "control.h"
 
+#define SWITCH_BAR_WIDTH    100
+#define SWITCH_BAR_HIGHT    20
+#define SWITCH_BAR_X        ((LCD_GetWidth()/2) - (SWITCH_BAR_WIDTH / 2))
+#define SWITCH_BAR_Y        20
+#define SWITCH_BAR_BORDER_COLOR LCD_RED
+#define SWITCH_BAR_COLOR        LCD_BLUE
+#define SWITCH_BAR_BACK_COLOR   LCD_BLACK
+#define SOFT_SWITCH_Y        6
+#define BAT_VOLTAGE_Y        (SOFT_SWITCH_Y + 1)
+
 static uint16_t vscales[] = {10, 20, 50, 100, 200, 500, 1000 , 2000, 5000};  //mV values
+uint8_t cdone = 0, idx = 6;
 
 void TEST_BlinkLed(uint8_t times){
     while(times--){
@@ -19,15 +27,15 @@ void TEST_BlinkLed(uint8_t times){
 /*
  * @brief test softpower
  */
-#define SOFT_SWITCH_Y        19
 void TEST_SoftPower(void){
-static uint32_t time;
-uint16_t pbutton = SOFTPOWER_Read();
+    static uint32_t time;
+    uint16_t pbutton = POWER_GetPwrBtnValue();
+
     if(pbutton > SOFTPOWER_PRESSED_VALUE){
         if(ElapsedTicks(time) > 500){
             LIB2D_Print("\nGoing to power down in 1S");
             DelayMs(1000);
-            SOFTPOWER_PowerOff();
+            POWER_PowerOff();
         }
         DelayMs(100);
         LIB2D_SetCursor(0,SOFT_SWITCH_Y);
@@ -35,27 +43,6 @@ uint16_t pbutton = SOFTPOWER_Read();
     }else{
         time = GetTick();
     }
-}
-
-void TEST_Buttons(void){
-char *btn = "";
-	uint32_t event = BUTTON_Read();
-    if(event == BUTTON_PRESSED){
-        switch(BUTTON_GetValue()){
-        case BUTTON_LEFT:
-            btn = " LEFT ";
-            break;
-        case BUTTON_RIGHT:
-            btn = " RIGHT ";
-            break;
-        case BUTTON_CENTER:
-            btn = " CENTER";
-            break;  
-        }      
-	}else if(event == BUTTON_RELEASED){
-			btn = "       ";
-	}
-    LIB2D_Print("%s", btn);
 }
 
 //--------------------------------------------------------
@@ -80,15 +67,7 @@ int8_t step = 0;
     }
 }
 
-#define SWITCH_BAR_WIDTH    100
-#define SWITCH_BAR_HIGHT    20
-#define SWITCH_BAR_X        ((LCD_GetWidth()/2) - (SWITCH_BAR_WIDTH / 2))
-#define SWITCH_BAR_Y        20
-#define SWITCH_BAR_BORDER_COLOR LCD_RED
-#define SWITCH_BAR_COLOR        LCD_BLUE
-#define SWITCH_BAR_BACK_COLOR   LCD_BLACK
-
-void TEST_MultiSwitchFill(int32_t percent){
+void TEST_MultiSwitchSlider(int32_t percent){
     if(percent > 100 || percent < -100){
         return;
     }
@@ -107,22 +86,25 @@ void TEST_MultiSwitchFill(int32_t percent){
         LCD_FillRect(SWITCH_BAR_X + 2 + (SWITCH_BAR_WIDTH/2), SWITCH_BAR_Y + 2, percent - 3, SWITCH_BAR_HIGHT - 3, SWITCH_BAR_COLOR);
         LCD_FillRect(SWITCH_BAR_X - 1 + (SWITCH_BAR_WIDTH/2) + percent, SWITCH_BAR_Y + 2, (SWITCH_BAR_WIDTH/2) - percent, SWITCH_BAR_HIGHT - 3, SWITCH_BAR_BACK_COLOR);
     }
+}
 
+void TEST_MultiSwitchSliderBorder(uint16_t color){
+    LCD_Rect(SWITCH_BAR_X, SWITCH_BAR_Y, SWITCH_BAR_WIDTH, SWITCH_BAR_HIGHT, color);
 }
-void TEST_MultiSwitchInit(){
-    LCD_Rect(SWITCH_BAR_X, SWITCH_BAR_Y, SWITCH_BAR_WIDTH, SWITCH_BAR_HIGHT, SWITCH_BAR_BORDER_COLOR);
-    TEST_MultiSwitchFill(0);
-}
+
 void TEST_MultiSwitch(){
 
- uint32_t val;     
+    uint32_t val;     
 
     if(BUTTON_Read() == BUTTON_EMPTY){
+        LIB2D_SetPos(0, SWITCH_BAR_Y);
+        LIB2D_Print("%04X", 0);
         return;
     }
 
     if(BUTTON_GetEvents() == BUTTON_RELEASED){
-        TEST_MultiSwitchFill(0);
+        TEST_MultiSwitchSlider(0);
+        TEST_MultiSwitchSliderBorder(LCD_GREEN);
         return;
     }
 
@@ -132,31 +114,29 @@ void TEST_MultiSwitch(){
    
     val = BUTTON_GetValue();
 
-    LIB2D_SetCursor(0, SWITCH_BAR_Y);
+    LIB2D_SetPos(0, SWITCH_BAR_Y);
     LIB2D_Print("%4X", val);
 
-    if(val & BUTTON_LEFT2){
-        TEST_MultiSwitchFill(-100);
-        return;
-    }
-
     if(val & BUTTON_LEFT){
-        TEST_MultiSwitchFill(-50);
+        if(val & BUTTON_LEFT2){
+            TEST_MultiSwitchSlider(-100);
+        }else{
+            TEST_MultiSwitchSlider(-50);
+        }
         return;
+    }else if(val & BUTTON_RIGHT){
+        if(val & BUTTON_RIGHT2){
+            TEST_MultiSwitchSlider(100);
+        }else{
+            TEST_MultiSwitchSlider(50);
+        }
+        return;
+    }else if(val & BUTTON_CENTER){
+        TEST_MultiSwitchSliderBorder(LCD_RED);
     }
-
-    if(val & BUTTON_RIGHT2){
-        TEST_MultiSwitchFill(100);
-        return;
-    }
-
-    if(val & BUTTON_RIGHT){
-        TEST_MultiSwitchFill(50);
-        return;
-    }    
 }
 //--------------------------------------------------------
-uint8_t cdone = 0, idx = 6;
+
 
 #if defined(__TDSO__)
 uint16_t buf[2048];
@@ -209,21 +189,39 @@ void TEST_Capture(void){
         DelayMs(200);
     }
 }
+
+void TEST_BatteryVoltage()
+{
+    static uint32_t time;
+
+    if(GetTick() - time > 1000){
+        uint16_t vbat = POWER_GetBatVoltage();
+        LIB2D_SetCursor(0, BAT_VOLTAGE_Y);
+		LIB2D_Print("BAT: %4umV\n", vbat);	
+        time = GetTick();
+    }
+}
 #endif
 
 void TEST_Run(void){
+    LIB2D_Print("Test mode\n");
+    TEST_BlinkLed(3);
+
 #if defined(__TDSO__)
     //TEST_Config_DMA();
     //TEST_Enable_ADC();
     //TEST_Enable_TIM4(20000);
 
-    TEST_MultiSwitchInit();
+    TEST_MultiSwitchSlider(0);
+    TEST_MultiSwitchSliderBorder(LCD_GREEN);
+    POWER_CalibrateADC();
 #endif
     while(1){
         //TEST_Capture();
         //TEST_FrontendSelector(&idx);
         TEST_SoftPower();
         TEST_MultiSwitch();
+        TEST_BatteryVoltage();
         DelayMs(20);
     }
 }
