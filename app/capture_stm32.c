@@ -17,17 +17,17 @@ uint16_t trigger;
  * Trigger interrupt handler
  * */
 void TIM1_CC_IRQHandler(void){
-    // half of samples already aquired, enable trigger
+    // half of samples already acquired, enable trigger
     if(TIM1->SR & TIM_SR_CC2IF){
         TIM1->CR1 |= TIM_CR1_OPM;                       // On capture event, stop timer
         TIM1->CCER = TIM_CCER_CC1E | TIM_CCER_CC1P;     // Enable capture on TI1
     }
-    // Trigger aquired, stop capture
+    // Trigger acquired, stop capture
     else if(TIM1->SR & TIM_SR_CC1IF){
         TIM1->CR1 = 0;                      // Disable Timer
         TIM1->CCER = 0;                     // Disable compare/capture
         trigger = TIM1->CCR1;               // Get trigger index
-        triggered = ON;
+        triggered = true;
     }
     TIM1->SR = OFF; // TODO : handle this correctly
 }
@@ -36,10 +36,12 @@ void TIM1_CC_IRQHandler(void){
  * DMA transfer end (all data) interrupt handler
  * */
 void DMA1_Channel1_IRQHandler(void){
-    CAP_Stop();
+
+    if(DMA1->ISR & DMA_ISR_TCIF1){
+        CAP_Stop();
+        ADC1->SR = OFF;                  // Clear ADC1 Flags        
+    }
     DMA1->IFCR |= DMA_IFCR_CGIF1;  // Clear DMA Flags TODO: ADD DMA Error handling ?
-    ADC1->SR = OFF;                  // Clear ADC1 Flags
-    done = ON;
 }
 
 /**
@@ -82,6 +84,9 @@ void DMA1_Channel1_IRQHandler(void){
 #define TIMxCCMR1_OC2CE              (1<<15)
 
 #define ADC_CR1_FAST_INTERLEAVED     (7<<16)
+#define ADC_CR1_INDEPENDENT          (0<<16)
+#define ADC_SMPR2_SMP0_(cy)          (cy << 0)
+
 
 void CAP_Init(void){
     /* Configure DMA Channel1*/
@@ -91,7 +96,7 @@ void CAP_Init(void){
     DMA1_Channel1->CCR =
             DMA_CCR_PL |        // Highest priority
             DMA_CCR_MSIZE_0 |   // 16bit Dst size
-            DMA_CCR_PSIZE_1 |   // 32bit src size
+            DMA_CCR_PSIZE_0 |   // 16bit src size
             DMA_CCR_MINC |      // increment memory pointer after transference
             DMA_CCR_TCIE;       // Enable end of transfer interrupt
 
@@ -109,20 +114,25 @@ void CAP_Init(void){
     RCC->APB2ENR  |= RCC_APB2ENR_ADC1EN;     // Enable Adc1
     RCC->APB2RSTR |= RCC_APB2ENR_ADC1EN;
     RCC->APB2RSTR &= ~RCC_APB2ENR_ADC1EN;
-    ADC1->CR2 = ADC_CR2_ADON;               // Turn on ADC1
-    ADC1->CR2 |=
-            ADC_CR2_EXTTRIG |               // Only the rising edge of external signal can start the conversion
+
+    ADC1->CR1 = ADC_CR1_INDEPENDENT;        // Dual ADC not ideal since 2nd conversion is 7 clocks after first
+    ADC1->CR2 = ADC_CR2_ADON |              // Turn on ADC1
+             ADC_CR2_EXTTRIG |              // Only the rising edge of external signal can start the conversion
             ADC_CR2_EXTSEL_2 |              // Select Tim4_CH4 as Trigger source
             ADC_CR2_EXTSEL_0 |              //
             ADC_CR2_DMA;                    // Enable DMA Request
-    ADC1->CR1 = ADC_CR1_FAST_INTERLEAVED;   // Dual ADC, Fast interleaved mode
+
+    ADC1->SMPR2 = ADC_SMPR2_SMP0_(0);       // CH0 sample time: 1.5 cycles
+                  
+#if 0
+    /* Configure ADC2 */
     ADC2->CR2 = ADC_CR2_EXTTRIG  |
-    		    ADC_CR2_EXTSEL_2 |          // Select Ext for dual convertion
+    		    ADC_CR2_EXTSEL_2 |          // Select Ext for dual conversion
 				ADC_CR2_EXTSEL_1 |
     		    ADC_CR2_EXTSEL_0 |
 				ADC_CR2_ADON;
     ADC2->SQR3 = 0;							// Select AN channel 0
-
+#endif
     NVIC_SetPriority(DMA1_Channel1_IRQn, 0); // Highest priority
     NVIC_EnableIRQ(DMA1_Channel1_IRQn);
 
@@ -148,7 +158,7 @@ void CAP_Init(void){
     NVIC_EnableIRQ(TIM1_CC_IRQn);
     TIM1->CR1 = 1;
 
-    done = 1;
+    done = true;
 }
 
 /**
@@ -163,10 +173,10 @@ void CAP_SetSampleRate(uint32_t sr){
 }
 
 void CAP_Start(int16_t *dst, uint16_t size){
-    done = OFF;
-    triggered = OFF;
+    done = false;
+    triggered = false;
 
-    DMA1_Channel1->CNDTR = size;
+    DMA1_Channel1->CNDTR = size/2;
     DMA1_Channel1->CMAR = (uint32_t)dst;
     DMA1_Channel1->CCR |= DMA_CCR_EN;
 
@@ -181,7 +191,7 @@ void CAP_Start(int16_t *dst, uint16_t size){
 }
 
 void CAP_Stop(void){
-    done = 1;
+    done = true;
     TIM4->CR1 &= ~TIM_CR1_CEN;          // Stop Timer
     DMA1_Channel1->CCR &= ~DMA_CCR_EN;  // Disable DMA
 
@@ -207,6 +217,6 @@ uint16_t index = 1024;
 uint16_t CAP_GetTriggerIndex(){
     if(triggered)
         return trigger;
-    return OFF;
+    return false;
 }
 

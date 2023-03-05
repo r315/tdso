@@ -85,6 +85,7 @@ extern "C" {
 
 #define ON 1
 #define OFF 0
+enum {false = 0, true};
 
 #define TB_1MS 					1000
 #define TB_1MS_IDX 				6
