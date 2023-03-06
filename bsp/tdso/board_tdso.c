@@ -31,43 +31,12 @@ static void MX_TIM3_Init(void);
 static void MX_ADC2_Init(void);
 
 void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
-                                                            
+void TDSO(void);                                                            
 
-/* USER CODE BEGIN PFP */
-/* Private function prototypes -----------------------------------------------*/
-#if defined(ENABLE_TESTS)
-void TEST_Run(void);
-#endif
-/* USER CODE END PFP */
-
-/* USER CODE BEGIN 0 */
-
-/* USER CODE END 0 */
-
-void Board_Init(void)
+int main(void)
 {
-
-  /* USER CODE BEGIN 1 */
-
-  /* USER CODE END 1 */
-
-  /* MCU Configuration----------------------------------------------------------*/
-
-  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
-
-  /* USER CODE BEGIN Init */
-
-  /* USER CODE END Init */
-
-  /* Configure the system clock */
   SystemClock_Config();
-
-  /* USER CODE BEGIN SysInit */
-
-  /* USER CODE END SysInit */
-
-  /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_DMA_Init();
   MX_ADC1_Init();
@@ -81,7 +50,6 @@ void Board_Init(void)
   spibus.freq = 10000;
   spibus.flags = SPI_HW_CS;
   SPI_Init(&spibus);
-  /* USER CODE BEGIN 2 */
 
   HAL_TIM_Base_Start(&htim3);
   HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_3); //start pwm dac for trigger
@@ -95,6 +63,11 @@ void Board_Init(void)
   ADC_Enable(&hadc2); // enable soft power button adc
 
   LCD_Init(&spibus);
+  LCD_Clear(LCD_BLACK);
+  LIB2D_Init();
+  BUTTON_Init(200);
+  TDSO();
+  return 0;
 }
 
 /** System Clock Configuration
@@ -425,3 +398,17 @@ static void MX_GPIO_Init(void)
    HAL_GPIO_Init(LCD_SDO_GPIO_Port, &GPIO_InitStruct);
 }
 
+/**
+* @brief This function handles System tick timer.
+*/
+void SysTick_Handler(void)
+{
+  /* USER CODE BEGIN SysTick_IRQn 0 */
+
+  /* USER CODE END SysTick_IRQn 0 */
+  HAL_IncTick();
+  HAL_SYSTICK_IRQHandler();
+  /* USER CODE BEGIN SysTick_IRQn 1 */
+
+  /* USER CODE END SysTick_IRQn 1 */
+}

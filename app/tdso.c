@@ -1,9 +1,10 @@
 #include "dso.h"
 #include <board.h>
 
+void TEST_Run(void);
 
 #if defined(__EMU__)
-int main(int argc, char *argv[]){
+void TDSO(void){
 
 unsigned int uitime = 0;
 
@@ -27,19 +28,10 @@ unsigned int uitime = 0;
     		#endif
     	}
     }
-    return 0;
 }
 #else
 
-void TEST_Run(void);
-
-int main(void){
-
-	Board_Init();
-    LIB2D_Init();
-    LCD_Clear(LCD_BLACK);
-
-    BUTTON_Init(200);
+void TDSO(void){   
 
     BUTTON_Read();
 
@@ -54,7 +46,6 @@ int main(void){
           DSO_Run(ON);
         }
     }
-return 0;
 }
 #endif
 
