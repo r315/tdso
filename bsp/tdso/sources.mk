@@ -25,28 +25,27 @@ $(BSP_PATH)/CMSIS/Include \
 
 CSRCS += \
 board_tdso.c \
-system_stm32f1xx.c \
 stm32f1xx_hal.c \
 stm32f1xx_hal_dma.c \
 stm32f1xx_hal_pcd.c \
 stm32f1xx_hal_pcd_ex.c \
 stm32f1xx_hal_msp.c \
-stm32f1xx_hal_rcc.c \
 stm32f1xx_hal_gpio.c \
 stm32f1xx_hal_tim.c \
+stm32f1xx_hal_rcc.c \
 stm32f1xx_hal_rcc_ex.c \
 stm32f1xx_hal_tim_ex.c \
 stm32f1xx_hal_cortex.c \
 stm32f1xx_hal_adc.c \
 stm32f1xx_hal_adc_ex.c \
 stm32f1xx_hal_spi.c \
-stm32f1xx_ll_usb.c \
 spi_stm32f1xx.c \
 dma_stm32f1xx.c \
 capture_stm32.c \
 ili9341.c\
+startup_stm32f103.c \
 
-ASRCS +=startup_stm32f103xb.s
+#ASRCS +=startup_stm32f103xb.s
 
 LDSCRIPT ="$(BSP_PATH)/bluepill/startup/STM32F103C8Tx_FLASH.ld"
 

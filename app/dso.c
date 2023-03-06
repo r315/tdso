@@ -274,10 +274,10 @@ Channel *ch;
                  step = 1;
                  break;
 
-            case BUTTON_LEFT2:
+            case BUTTON_LEFT | BUTTON_LEFT2:
                  step = -4;
                  break;
-            case BUTTON_RIGHT2:
+            case BUTTON_RIGHT | BUTTON_RIGHT2:
                  step = 4;
                  break;
 #endif
@@ -487,11 +487,11 @@ uint8_t DSO_SelectHpos(void *data){
                     DSO_MoveHpos(1);
                     break;
 
-                case BUTTON_LEFT2:
+                case BUTTON_LEFT | BUTTON_LEFT2:
                     DSO_MoveHpos(-4);
                     break;
 
-                case BUTTON_RIGHT2:
+                case BUTTON_RIGHT | BUTTON_RIGHT2:
                     DSO_MoveHpos(4);
                     break;
 #if defined(__BLUEBOARD__)
@@ -574,11 +574,11 @@ int16_t newpos;
                  step = 1;
                  break;
 
-            case BUTTON_LEFT2:
+            case BUTTON_LEFT | BUTTON_LEFT2:
             	step = -4;
                  break;
 
-            case BUTTON_RIGHT2:
+            case BUTTON_RIGHT | BUTTON_RIGHT2:
                  step = 4;
                  break;
 #endif
