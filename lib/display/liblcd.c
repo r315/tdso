@@ -1,4 +1,4 @@
-#include <lcd.h>
+#include "liblcd.h"
 
 
 void LCD_Clear(uint16_t color){	

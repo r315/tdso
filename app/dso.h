@@ -7,8 +7,6 @@
 extern "C" {
 #endif
 
-#include "lcd.h"
-
 #define DSO_VERSION 			"V1.0"
 #define DSO_BACKGROUND			RGB565(4,8,6)
 

@@ -7,7 +7,7 @@
 * @author	Hugo Reis
 **********************************************************************/
 #include "board.h"
-#include "button.h"
+#include "libbutton.h"
 
 static BUTTON_Controller __button;
 

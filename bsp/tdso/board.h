@@ -5,17 +5,16 @@
 extern "C" {
 #endif
 
+#include "stm32f1xx.h"
+#include "stm32f1xx_hal.h"
+#include "ili9341.h"
+#include "libbutton.h"
+#include "liblcd.h"
+#include "lib2d.h"
+
 #ifndef __TDSO__
 #define __TDSO__
 #endif
-
-#include <lcd.h>
-#include <ili9341.h>
-#include <button.h>
-#include "lib2d.h"
-
-#include "stm32f1xx_hal.h"
-#include "stm32f1xx.h"
 
 #define GPIO_Set(port, pinmask) port->BSRR = pinmask
 #define GPIO_Clr(port, pinmask) port->BRR = pinmask
@@ -40,8 +39,8 @@ extern "C" {
 #define SOFTPOWER_PORT GPIOA
 #define SOFTPOWER_PIN  GPIO_PIN_2
 
-#define GetTick HAL_GetTick
-#define DelayMs(_D) HAL_Delay(_D)
+#define GetTick         HAL_GetTick
+#define DelayMs(_D)     HAL_Delay(_D)
 
 static inline uint32_t ElapsedTicks(uint32_t start_ticks){ 
     uint32_t current = GetTick(); 

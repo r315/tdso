@@ -2,8 +2,8 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include "lib2d.h"
+#include "liblcd.h"
 #include "font.h"
-#include "lcd.h"
 
 #define LIB2D_FLOAT_MAX_PRECISION 		8
 

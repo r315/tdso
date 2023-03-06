@@ -7,8 +7,8 @@
 * @author	Hugo Reis
 **********************************************************************/
 
-#ifndef _button_h_
-#define _button_h_
+#ifndef _libbutton_h_
+#define _libbutton_h_
 
 
 #ifdef __cplusplus

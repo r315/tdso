@@ -1,5 +1,5 @@
-#ifndef _lcd_h_
-#define _lcd_h_
+#ifndef _liblcd_h_
+#define _liblcd_h_
 
 #ifdef __cplusplus
 extern "C" {

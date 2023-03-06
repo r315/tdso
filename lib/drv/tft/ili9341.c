@@ -1,7 +1,6 @@
 #include "ili9341.h"
 #include "board.h"
 #include "spi.h"
-#include "lcd.h"
 
 #define DELAY 			0x0080
 
