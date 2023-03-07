@@ -10,7 +10,7 @@
 
 #include "dso.h"
 
-#if defined(__TDSO__)
+#if defined(BOARD_TDSO)
 
 #define CONTROL_GAIN_STAGES		4
 #define CONTROL_GAIN_PORT		GPIOB
@@ -38,14 +38,11 @@
 #error config board
 #endif
 
-#ifndef null
-#define null ((void*)0)
-#endif
-
+void CONTROL_Init(Dso *dso);
 void CONTROL_SetGain(uint8_t scale);
 void CONTROL_SetTriggerLevel(int16_t level);
 void CONTROL_SetTriggerEdge(uint16_t edge);
 void CONTROL_SetVpos(Channel *ch);
-void CONTROL_Init(Dso *dso);
+void CONTROL_TestSignal(uint8_t en);
 
 #endif /* CONTROL_H_ */

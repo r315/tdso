@@ -261,7 +261,7 @@ uint16_t SPI_Send(uint16_t data){
 uint16_t SPI_Send(uint16_t data){                
   HAL_SPI_Transmit(&hspi1, &data, 1, 10);
 } 
-#endif /* __TDSO__ */
+#endif /* BOARD_TDSO */
 
 /** System Clock Configuration
 */

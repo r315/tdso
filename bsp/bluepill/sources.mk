@@ -46,7 +46,7 @@ ASRCS +=startup_stm32f103xb.s
 LDSCRIPT ="bsp/bluepill/startup/STM32F103C8Tx_FLASH.ld"
 
 DEVICE =STM32F103xB
-GCSYMBOLS +=__TDSO__ $(DEVICE) USE_HAL_DRIVER __weak='__attribute__((weak))' __packet='__attribute__((__packed__))'
+GCSYMBOLS +=BOARD_TDSO $(DEVICE) USE_HAL_DRIVER __weak='__attribute__((weak))' __packet='__attribute__((__packed__))'
 #########################################################
 #Startup files and libraries
 #########################################################

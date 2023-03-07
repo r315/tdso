@@ -12,8 +12,8 @@ extern "C" {
 #include "liblcd.h"
 #include "lib2d.h"
 
-#ifndef __TDSO__
-#define __TDSO__
+#ifndef BOARD_TDSO
+#define BOARD_TDSO
 #endif
 
 #define GPIO_Set(port, pinmask) port->BSRR = pinmask

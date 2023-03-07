@@ -138,7 +138,7 @@ void TEST_MultiSwitch(){
 //--------------------------------------------------------
 
 
-#if defined(__TDSO__)
+#if defined(BOARD_TDSO)
 uint16_t buf[2048];
 
 void __DMA1_Channel1_IRQHandler(void){
@@ -207,7 +207,7 @@ void TEST_Run(void){
     LIB2D_Print("Test mode\n");
     TEST_BlinkLed(3);
 
-#if defined(__TDSO__)
+#if defined(BOARD_TDSO)
     //TEST_Config_DMA();
     //TEST_Enable_ADC();
     //TEST_Enable_TIM4(20000);

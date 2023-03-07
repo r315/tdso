@@ -11,7 +11,7 @@
 #define VREFINT_CHANNEL	17
 #define VREFINT_VALUE 	1200.0f
 
-#if defined(__TDSO__)
+#if defined(BOARD_TDSO)
 extern ADC_HandleTypeDef hadc2;
 static float adc_res;
 static float vdiv_bat;

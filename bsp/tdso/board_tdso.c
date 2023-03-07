@@ -23,7 +23,6 @@ static void MX_GPIO_Init(void);
 static void MX_DMA_Init(void);
 static void MX_ADC1_Init(void);
 static void MX_TIM2_Init(void);
-static void MX_TIM3_Init(void);
 static void MX_ADC2_Init(void);
 
 void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
@@ -38,23 +37,17 @@ int main(void)
     MX_ADC1_Init();
     MX_ADC2_Init();
     MX_TIM2_Init();
-    MX_TIM3_Init();
-    // MX_TIM4_Init();
-    // MX_USART1_UART_Init();
-    // MX_USB_DEVICE_Init();
+   
     spibus.bus = SPI_BUS0;
     spibus.freq = 10000;
     spibus.flags = SPI_HW_CS;
     SPI_Init(&spibus);
 
-    HAL_TIM_Base_Start(&htim3);
-    HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_3); // start pwm dac for trigger
+    HAL_TIM_Base_Start(&htim2);
+    HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
 
     HAL_TIM_Base_Start(&htim2);
-    HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1); // start Test signal
-
-    HAL_TIM_Base_Start(&htim2);
-    HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_4); // start Test signal
+    HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_4);
 
     ADC_Enable(&hadc2); // enable soft power button adc
 
@@ -108,7 +101,6 @@ void SystemClock_Config(void)
 /* ADC1 init function */
 static void MX_ADC1_Init(void)
 {
-
     ADC_InjectionConfTypeDef sConfigInjected;
     ADC_ChannelConfTypeDef sConfig;
 
@@ -239,55 +231,6 @@ static void MX_TIM2_Init(void)
     }
 
     HAL_TIM_MspPostInit(&htim2);
-}
-
-/* TIM3 init function */
-static void MX_TIM3_Init(void)
-{
-
-    TIM_ClockConfigTypeDef sClockSourceConfig;
-    TIM_MasterConfigTypeDef sMasterConfig;
-    TIM_OC_InitTypeDef sConfigOC;
-
-    htim3.Instance = TIM3;
-    htim3.Init.Prescaler = 72 - 1;
-    htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
-    htim3.Init.Period = 1000 - 1;
-    htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-    htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-    if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
-    {
-        _Error_Handler(__FILE__, __LINE__);
-    }
-
-    sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
-    if (HAL_TIM_ConfigClockSource(&htim3, &sClockSourceConfig) != HAL_OK)
-    {
-        _Error_Handler(__FILE__, __LINE__);
-    }
-
-    if (HAL_TIM_PWM_Init(&htim3) != HAL_OK)
-    {
-        _Error_Handler(__FILE__, __LINE__);
-    }
-
-    sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
-    sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-    if (HAL_TIMEx_MasterConfigSynchronization(&htim3, &sMasterConfig) != HAL_OK)
-    {
-        _Error_Handler(__FILE__, __LINE__);
-    }
-
-    sConfigOC.OCMode = TIM_OCMODE_PWM1;
-    sConfigOC.Pulse = 500 - 1;
-    sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
-    sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
-    if (HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_3) != HAL_OK)
-    {
-        _Error_Handler(__FILE__, __LINE__);
-    }
-
-    HAL_TIM_MspPostInit(&htim3);
 }
 
 /**

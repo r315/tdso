@@ -34,7 +34,7 @@ uint8_t DSO_TriggerEdge(void*);
 void DSO_TriggerStatus(uint8_t tgs);
 
 Menuentry tmenu [] = {
-    {"Level", null, DSO_TriggerLevel},
+    {"Level", NULL, DSO_TriggerLevel},
     {"Auto", (void*)(tgmodes), DSO_TriggerMode},
     {"Normal", (void*)(tgmodes + 1), DSO_TriggerMode},
     {"Single", (void*)(tgmodes + 2), DSO_TriggerMode},
@@ -58,8 +58,8 @@ Menu triggermenu = {
 };
 
 Menuentry fmenu [] = {
-    {"T/Div",null,DSO_SelectTbase},
-    {"H Pos",null,DSO_SelectHpos},
+    {"T/Div",NULL, DSO_SelectTbase},
+    {"H Pos",NULL, DSO_SelectHpos},
     {"Trigger",(void*)&triggermenu,DSO_MenuSelector},
     {"V/Div",(void*)(schannels+0),DSO_ChannelVscale},
     {"V Pos",(void*)(schannels+0),DSO_ChannelMoveVpos}
@@ -808,10 +808,12 @@ void DSO_Init(void){
     DSO_ChannelUpdateVpos(&dso,DSO_SIGNAL0_CHANNEL, DSO_MAX_CHANNELS);
 
     dso.activeControl = DSO_SelectTbase;
-    dso.menudata = null;
+    dso.menudata = NULL;
 
     memset(screenwave,0,512); // clear old wave storage
 
+    CONTROL_TestSignal(ON);
+    
     LCD_Bkl(ON);
 
     CAP_Init();
