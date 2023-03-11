@@ -39,19 +39,15 @@ void CAP_SetSampleRate(uint32_t tb_us);
 void CAP_SetTrigger(uint16_t level);
 
 /*
- * @brief find index for edge
- */
-uint16_t CAP_GetEdge(int16_t *buf, uint16_t size, int16_t level);
-
-/*
  * @brief get index for trigger
  */
-uint16_t CAP_GetTriggerIndex(void);
+uint16_t CAP_GetTriggerOffset(void);
 
 /*
  * @brief check if trigger has occurred on capture
  */
 uint8_t CAP_Triggered(void);
 
+void CAP_SetTriggerEdge(uint8_t rising);
 #endif
 

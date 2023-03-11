@@ -39,7 +39,7 @@ int main(void)
     MX_TIM2_Init();
    
     spibus.bus = SPI_BUS0;
-    spibus.freq = 10000;
+    spibus.freq = 9000;
     spibus.flags = SPI_HW_CS;
     SPI_Init(&spibus);
 

@@ -31,14 +31,6 @@ void CONTROL_SetTriggerLevel(int16_t level){
 				CONTROL_TGLEVEL_PWM_MAX, CONTROL_TGLEVEL_PWM_MIN);
 }
 
-/*
- * Configure interrupt edge to match trigger comparator output edge
- */
-void CONTROL_SetTriggerEdge(uint16_t edge){
-
-}
-
-
 void CONTROL_SetVpos(Channel *ch){
 	TIM2->CCR4 = map(ch->pos + CONTROL_VPOS_ZERO, 
 				CONTROL_VPOS_MIN, CONTROL_VPOS_MAX, 

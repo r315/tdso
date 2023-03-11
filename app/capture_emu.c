@@ -83,7 +83,7 @@ uint16_t index =0;
     return index;
 }
 
-uint16_t CAP_GetTriggerIndex(void){
+uint16_t CAP_GetTriggerOffset(void){
 return 0;
 }
 

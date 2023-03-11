@@ -647,7 +647,7 @@ uint8_t DSO_TriggerEdge(void *data){
 
     LCD_WriteArea(DSO_TGEDGE_DRO_X, DSO_TGEDGE_DRO_Y, iw, ih, vslice);
 
-    CONTROL_SetTriggerEdge(dso.trigger.edge);
+    CAP_SetTriggerEdge(dso.trigger.edge == TRIGGER_RISING_EDGE);
     dso.activeControl = DSO_SelectTbase;
     return OFF;
 }
@@ -730,7 +730,7 @@ void DSO_DrawWaves(void){
 uint16_t i, sidx;
   
     UTIL_StartTiming();
-    sidx = CAP_GetTriggerIndex();
+    sidx = CAP_GetTriggerOffset();
 
     if(sidx != 0){
         sidx -= DSO_MAX_SAMPLES/2;
