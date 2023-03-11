@@ -6,11 +6,12 @@
 #include "capture.h"
 #include "board.h"
 
-#define CAPTURE_TIMER_CLOCK         2000000UL   // Timer clock must be double due to ADC rising edge trigger
-#define CAPTURE_MIN_SAMPLE_TIME     2           // 2us
+#define ENABLE_ADC_TRIGGER_OUTPUT   0
+
+#define SAMPLE_RATE_TIMER_FREQ    18   // this values ensures a maximum of 1Msps with rising edge of OC4REF
 
 static uint8_t done, triggered;
-static uint32_t trigger, edge;
+static uint32_t trigger_offset, edge;
 
 /**
  *
@@ -75,7 +76,7 @@ void CAP_Init(void){
     RCC->APB2RSTR &= ~RCC_APB2ENR_ADC1EN;
 
     RCC->CFGR = (RCC->CFGR & ~RCC_CFGR_ADCPRE) |
-                (2 << RCC_CFGR_ADCPRE_Pos); // ADC clock source = PCLK /6
+                 RCC_CFGR_ADCPRE_DIV4;      // ADC clock source = PCLK /4
 
     ADC1->CR1 = ADC_CR1_INDEPENDENT;        // Dual ADC not ideal since 2nd conversion is 7 clocks after first
     ADC1->CR2 = ADC_CR2_ADON |              // Turn on ADC1
@@ -96,7 +97,6 @@ void CAP_Init(void){
     ADC2->SQR3 = 0;							// Select AN channel 0
     ADC1->SMPR2 = ADC_SMPR2_SMP0_(0);       // CH0 sample time: 1.5 cycles
 
-    //NVIC_SetPriority(DMA1_Channel1_IRQn, 0); // Highest priority
     NVIC_EnableIRQ(DMA1_Channel1_IRQn);
 
     /**
@@ -128,12 +128,19 @@ void CAP_Init(void){
     RCC->APB1RSTR |= RCC_APB1ENR_TIM4EN;    // Reset timer registers
     RCC->APB1RSTR &= ~RCC_APB1ENR_TIM4EN;
 
-    TIM4->CCMR2 = (3<<TIM_CCMR2_OC4M_Pos);  // OC4M = 3 => OC4REF toggles on CCR4 match
+    TIM4->CCMR2 = (6<<TIM_CCMR2_OC4M_Pos);  // OC4M = 6 => PWM Mode 1, OC4REF rises on match with ARR
     TIM4->CR2 = (7<<TIM_CR2_MMS_Pos);       // MMS = 7 => TRGO = OC4REF
     TIM4->SMCR = TIM_SMCR_MSM;              // Synchronize with slaves
     TIM4->CCER = TIM_CCER_CC4E;             // Enable compare with CCR4
-    TIM4->PSC = (SystemCoreClock/CAPTURE_TIMER_CLOCK) - 1; // Set Timer clock
+    TIM4->PSC = ((SystemCoreClock/SAMPLE_RATE_TIMER_FREQ)/1000000) - 1;   // Set Timer clock pre-scaler, TMR clock = 18MHz
 
+    #if ENABLE_ADC_TRIGGER_OUTPUT
+    RCC->APB2ENR |= RCC_APB2ENR_IOPBEN;     // Enable GPIOB
+
+    GPIOB->CRH &= ~(0x0f<<4);
+    GPIOB->CRH |= (0x0A<<4);				// PA9 out-pp
+
+    #endif
     /**
      *  Configure PA8 as floating GPI to trigger timer1 capture
      * */
@@ -143,22 +150,27 @@ void CAP_Init(void){
     GPIOA->CRH |= (0x04<<0);				// PA8 Floating input
 
     NVIC_EnableIRQ(TIM1_CC_IRQn);
-    TIM1->CR1 = 1;
-
     done = true;
 }
 
 /**
  * @brief 
  * 
- * @param sr    2 to 2000 => 10uS to 50mS
+ * @param sr    1us to 2000us
  */
 void CAP_SetSampleRate(uint32_t sr){
-    if(sr < CAPTURE_MIN_SAMPLE_TIME){
-        sr = CAPTURE_MIN_SAMPLE_TIME;
+    if(sr == 0){
+        sr = 1;
     }
+
+    if(sr > 2000){
+        sr = 2000;
+    }
+
+    sr = sr * SAMPLE_RATE_TIMER_FREQ;
+
     TIM4->ARR =  sr - 1;
-    TIM4->CCR4 = sr - 1;
+    TIM4->CCR4 = (sr >> 1) - 1;
 }
 
 void CAP_Start(int16_t *dst, uint16_t size){
@@ -166,12 +178,11 @@ void CAP_Start(int16_t *dst, uint16_t size){
     DMA1_Channel1->CMAR = (uint32_t)dst;
     DMA1_Channel1->CCR |= DMA_CCR_EN;
 
-    TIM1->CCR2 = size>>2;                   // Enable trigger level capture when half of samples has been acquired.
-    TIM1->CCR1 = 0;
-    TIM1->CCER = TIM_CCER_CC2E;             // Capture is enable on CCR2 match
-    TIM1->DIER = TIM_DIER_CC2IE;
-    TIM1->SR = 0;
+    TIM1->CCR2 = size>>1;                   // Enable trigger level capture when half of samples has been acquired.
+    TIM1->CCER = TIM_CCER_CC2E;             // Enable compare output for CCR2
+    TIM1->DIER = TIM_DIER_CC2IE;            // Enable interrupt on CCR2 match
     TIM1->CNT = 0;
+    TIM1->SR = 0;
 
     TIM4->CNT = 0;
 
@@ -184,6 +195,7 @@ void CAP_Start(int16_t *dst, uint16_t size){
 
 void CAP_Stop(void){
     TIM4->CR1 &= ~TIM_CR1_CEN;          // Stop Timer
+    TIM1->CR1  = 0;
     DMA1_Channel1->CCR &= ~DMA_CCR_EN;  // Disable DMA
     done = true;
 }
@@ -197,7 +209,7 @@ uint8_t CAP_Triggered(void){
 }
 
 void CAP_SetTriggerEdge(uint8_t rising){
-    edge = (rising == 0) ? TIM_CCER_CC1E : TIM_CCER_CC1E | TIM_CCER_CC1P;
+    edge = (rising != 0) ? TIM_CCER_CC1E : TIM_CCER_CC1E | TIM_CCER_CC1P;
 }
 
 /**
@@ -206,7 +218,7 @@ void CAP_SetTriggerEdge(uint8_t rising){
  * @return uint16_t 0: no trigger, trigger position
  */
 uint16_t CAP_GetTriggerOffset(){
-    return trigger >> 2;
+    return trigger_offset;
 }
 
 /**
@@ -214,22 +226,22 @@ uint16_t CAP_GetTriggerOffset(){
  * */
 void TIM1_CC_IRQHandler(void){
     uint32_t sr = TIM1->SR;
-    TIM1->SR = 0;   
+    TIM1->SR = 0;
 
     if(sr & TIM_SR_CC2IF){
         // half of samples have been acquired, 
         // enable trigger level capture
-        trigger = TIM1->CNT;
-        TIM1->CCER = edge;                  // Configure edge polarity ad enable capture on TI1
-        TIM1->CR1 |= TIM_CR1_OPM;           // On capture event, stop timer
-        TIM1->DIER = TIM_DIER_CC1IE;
+        TIM1->CCER = edge;              // Enable capture on TI1 with edge and disable CC2E
+        TIM1->DIER = TIM_DIER_CC1IE;    // Enable CC1IE and disable CC2IE
+        trigger_offset = 0;             // Reset offset
     }
     // Trigger acquired, stop counting
-    else if(sr & TIM_SR_CC1IF){
-        trigger = TIM1->CCR1;               // Save trigger index
+    else if(sr & TIM_SR_CC1IF){        
+        TIM1->CR1 = 0;                  // Disable timer
+        trigger_offset = TIM1->CCR1;    // Save trigger index
         triggered = true;
-    }
-    
+    }   
+
 }
 
 /**
@@ -241,5 +253,6 @@ void DMA1_Channel1_IRQHandler(void){
         CAP_Stop();
         ADC1->SR = OFF;                  // Clear ADC1 Flags        
     }
+
     DMA1->IFCR |= DMA_IFCR_CGIF1;  // Clear DMA Flags TODO: ADD DMA Error handling ?
 }

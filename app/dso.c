@@ -9,7 +9,7 @@
 
 
 static Dso dso;
-static const uint16_t tbases[] =  {10, 20, 50, 100, 200, 500, TB_1MS, 2000, 5000, 10000, 20000, 50000};  //us values
+static const uint16_t tbases[] =  {25, 50, 100, 250, 500, TB_1MS, 2500, 5000, 10000, 25000, 50000};  //us values
 static const uint16_t vscales[] = {500, VS_1V , 2000, 5000};//{10, 20, 50, 100, 200, 500, VS_1V , 2000, 5000};  //mV values
 
 static const uint8_t tgmodes[] = {TRIGGER_AUTO, TRIGGER_NORMAL, TRIGGER_SINGLE};
@@ -727,13 +727,15 @@ void DSO_DrawSample(Channel *ch, uint16_t sindex, uint16_t x){
 }
 
 void DSO_DrawWaves(void){
-uint16_t i, sidx;
+uint32_t i, sidx;
   
     UTIL_StartTiming();
     sidx = CAP_GetTriggerOffset();
 
     if(sidx != 0){
-        sidx -= DSO_MAX_SAMPLES/2;
+        sidx -= DSO_MAX_SAMPLES / 2;
+    }else{
+        sidx = DSO_MAX_SAMPLES / 2;
     }
 
     sidx += dso.hpos;
