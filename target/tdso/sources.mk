@@ -1,0 +1,55 @@
+#########################################################
+# project files
+#########################################################
+CSRCPATH += \
+$(DRIVER_PATH)/tft \
+$(DRIVER_PATH)/spi \
+$(DRIVER_PATH)/dma \
+$(TARGET_PATH) \
+$(TARGET_PATH)/../bluepill/Src \
+$(TARGET_PATH)/../bluepill/startup \
+$(TARGET_PATH)/../bluepill/STM32F1xx_HAL_Driver/Src \
+
+INCSPATH += \
+$(DRIVER_PATH)/inc \
+$(TARGET_PATH) \
+$(TARGET_PATH)/../bluepill/STM32F1xx_HAL_Driver/Inc \
+$(TARGET_PATH)/../CMSIS/Device/ST/STM32F1xx/Include \
+$(TARGET_PATH)/../CMSIS/Include \
+
+CSRCS += \
+board_tdso.c \
+stm32f1xx_hal.c \
+stm32f1xx_hal_dma.c \
+stm32f1xx_hal_pcd.c \
+stm32f1xx_hal_pcd_ex.c \
+stm32f1xx_hal_msp.c \
+stm32f1xx_hal_gpio.c \
+stm32f1xx_hal_tim.c \
+stm32f1xx_hal_rcc.c \
+stm32f1xx_hal_rcc_ex.c \
+stm32f1xx_hal_tim_ex.c \
+stm32f1xx_hal_cortex.c \
+stm32f1xx_hal_adc.c \
+stm32f1xx_hal_adc_ex.c \
+stm32f1xx_hal_spi.c \
+spi_stm32f1xx.c \
+dma_stm32f1xx.c \
+capture_stm32.c \
+ili9341.c\
+startup_stm32f103.c \
+
+#ASRCS +=startup_stm32f103xb.s
+
+LDSCRIPT ="$(TARGET_PATH)/../bluepill/startup/STM32F103C8Tx_FLASH.ld"
+
+DEVICE =STM32F103xB
+GCSYMBOLS +=BOARD_TDSO $(DEVICE) USE_HAL_DRIVER __weak='__attribute__((weak))' __packet='__attribute__((__packed__))'
+#########################################################
+#Startup files and libraries
+#########################################################
+GCFLAGS =-mcpu=cortex-m3 -mthumb -mfloat-abi=soft -O0 -g3 -Wall -fmessage-length=0 -ffunction-sections
+LDFLAGS =-mcpu=cortex-m3 -mthumb -mfloat-abi=soft -Wl,--gc-sections
+#LIBS =-nostdlib -lgcc #-lc -lnosys
+
+

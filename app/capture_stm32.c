@@ -138,7 +138,7 @@ void CAP_Init(void){
     RCC->APB2ENR |= RCC_APB2ENR_IOPBEN;     // Enable GPIOB
 
     GPIOB->CRH &= ~(0x0f<<4);
-    GPIOB->CRH |= (0x0A<<4);				// PA9 out-pp
+    GPIOB->CRH |= (0x0A<<4);				// PA9 AF out-pp
 
     #endif
     /**
