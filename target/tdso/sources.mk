@@ -31,7 +31,6 @@ stm32f1xx_hal_adc_ex.c \
 stm32f1xx_hal_spi.c \
 spi_stm32f1xx.c \
 dma_stm32f1xx.c \
-capture_stm32.c \
 ili9341.c\
 startup_stm32f103.c \
 

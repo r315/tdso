@@ -22,7 +22,18 @@ $(TARGET_PATH)/../bluepill/CMSIS/Include \
 $(TARGET_PATH)/../bluepill/CMSIS/Device/ST/STM32F1xx/Include \
 $(APP_PATH) \
 
-CSRCS =libbutton.c lib2d.c liblcd.c font.c dso.c control.c power.c tdso.c tdso_util.c tests.c
+CSRCS =\
+libbutton.c \
+lib2d.c \
+liblcd.c \
+font.c \
+dso.c \
+control.c \
+power.c \
+tdso.c \
+tdso_util.c \
+tests.c \
+sample_engine.c \
 
 #########################################################
 # TOOLCHAIN
