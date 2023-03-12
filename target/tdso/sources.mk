@@ -2,16 +2,12 @@
 # project files
 #########################################################
 CSRCPATH += \
-$(DRIVER_PATH)/tft \
-$(DRIVER_PATH)/spi \
-$(DRIVER_PATH)/dma \
 $(TARGET_PATH) \
 $(TARGET_PATH)/../bluepill/Src \
 $(TARGET_PATH)/../bluepill/startup \
 $(TARGET_PATH)/../bluepill/STM32F1xx_HAL_Driver/Src \
 
 INCSPATH += \
-$(DRIVER_PATH)/inc \
 $(TARGET_PATH) \
 $(TARGET_PATH)/../bluepill/STM32F1xx_HAL_Driver/Inc \
 $(TARGET_PATH)/../CMSIS/Device/ST/STM32F1xx/Include \

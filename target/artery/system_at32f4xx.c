@@ -159,7 +159,7 @@ This value must be a multiple of 0x200. */
 /** @addtogroup at32f4xx_System_Private_Variables
   * @{
   */
-
+#define SYSCLK_FREQ_150MHz_HSI 1
 /*******************************************************************************
 *  Clock Definitions
 *******************************************************************************/

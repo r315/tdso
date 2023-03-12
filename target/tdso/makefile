@@ -3,20 +3,19 @@
 #########################################################
 TARGET =tdso
 TARGET_PATH =.
-LIB_PATH :=../../lib
-DRIVER_PATH :=$(LIB_PATH)/drv
+LIB_PATH :=../../sdk_emb/lib
+DRIVER_PATH :=../../sdk_emb/drv
 APP_PATH :=../../app
 BUILD_DIR :=build
 
-
 CSRCPATH =\
-$(LIB_PATH)/button \
-$(LIB_PATH)/display \
+$(LIB_PATH)/src \
+$(DRIVER_PATH)/src \
 $(APP_PATH) \
 
 INCSPATH =\
-$(LIB_PATH)/include \
-$(DRIVER_PATH)/include \
+$(LIB_PATH)/inc \
+$(DRIVER_PATH)/inc \
 $(TARGET_PATH) \
 $(TARGET_PATH)/../bluepill/STM32F1xx_HAL_Driver/Inc \
 $(TARGET_PATH)/../bluepill/CMSIS/Include \

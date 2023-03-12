@@ -77,7 +77,8 @@ int main(void)
        
     NVIC_Configuration();
 
-
+    SystemCoreClockUpdate();
+    
     Delay_init();
 
     GPIO_InitType gpio_init;
