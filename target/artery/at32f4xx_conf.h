@@ -22,15 +22,15 @@
 #include "at32f4xx_crc.h"
 //#include "at32f4xx_dac.h"
 #include "at32f4xx_dbgmcu.h"
-#include "at32f4xx_dma.h"
+//#include "at32f4xx_dma.h"
 #include "at32f4xx_ertc.h"
 #include "at32f4xx_exti.h"
 #include "at32f4xx_flash.h"
-#if !defined (AT32F421xx)
-#include "at32f4xx_gpio.h"
-#else
-#include "at32f4xx_gpio_ex.h"
-#endif
+//#if !defined (AT32F421xx)
+//#include "at32f4xx_gpio.h"
+//#else
+//#include "at32f4xx_gpio_ex.h"
+//#endif
 #include "at32f4xx_i2c.h"
 #include "at32f4xx_i2c_ex.h"
 #include "at32f4xx_iwdg.h"
@@ -38,7 +38,7 @@
 #include "at32f4xx_rcc.h"
 #include "at32f4xx_rtc.h"
 #include "at32f4xx_sdio.h"
-#include "at32f4xx_spi.h"
+//#include "at32f4xx_spi.h"
 #include "at32f4xx_tim.h"
 #include "at32f4xx_usart.h"
 #include "at32f4xx_wwdg.h"

@@ -61,8 +61,10 @@ void SPI_DMA_IRQHandler(spibus_t *spidev){
  * */
 static void SPI_SetFreq(SPI_TypeDef *spi, uint32_t freq){
 
-    uint32_t div = (HAL_RCC_GetPCLK2Freq()/1000)/freq;
+    uint32_t div;
     uint32_t br = 8;
+
+    div = ((spi == SPI1) ? HAL_RCC_GetPCLK2Freq() : HAL_RCC_GetPCLK1Freq()) / (1000 * freq);
 
     if(div > 256){
         div = 256;

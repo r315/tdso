@@ -20,31 +20,26 @@ endif
 ARTERY_SDK_ROOT =$(CURDIR)
 DRIVERS_PATH  =$(ARTERY_SDK_ROOT)/Drivers
 APP_SRC_PATH :=$(CURDIR)
-
+BUILD_DIR :=build
+SDK_PATH :=$(CURDIR)/../../sdk_emb
+SDK_DRIVERS_PATH :=$(SDK_PATH)/drv
+SDK_LIB_PATH :=$(SDK_PATH)/lib
+CMSIS_PATH :=$(CURDIR)/../../target/CMSIS_5-5.9.0
 
 SOURCES_PATH =  \
 $(APP_SRC_PATH) \
 $(DRIVERS_PATH)/StdPeriph_Driver/src \
 $(ARTERY_SDK_ROOT)/Startup \
+$(SDK_DRIVERS_PATH)/src \
 
-
-# firmware library path
-PERIFLIB_PATH = 
-
-# Build path
-BUILD_DIR :=build
-
-######################################
-# Include
-######################################
-
-# C includes
 C_INCLUDES =  \
 $(APP_SRC_PATH) \
+$(SDK_DRIVERS_PATH)/inc \
+$(SDK_LIB_PATH)/inc \
 $(DRIVERS_PATH)/StdPeriph_Driver/inc \
-$(DRIVERS_PATH)/CMSIS/Device/ARTERY/AT32F4xx/Include \
-$(DRIVERS_PATH)/CMSIS/Core/Include \
-# AS includes
+$(CMSIS_PATH)/Device/ARTERY/AT32F4xx/Include \
+$(CMSIS_PATH)/CMSIS/Core/Include \
+
 AS_INCLUDES =\
 
 ######################################
@@ -53,15 +48,17 @@ AS_INCLUDES =\
 
 # C sources
 C_SOURCES =  \
-blink.c \
-system_at32f4xx.c \
+startup_at32f415cbt7.c\
+board_artery.c \
 at32f4xx_rcc.c \
-at32f4xx_gpio.c \
-misc.c \
+spi_at32f4xx.c \
+dma_at32f4xx.c \
+gpio_at32f4xx.c \
+ili9341.c \
+
 
 # ASM sources
-ASM_SOURCES =  \
-$(APP_SRC_PATH)/startup_at32f415cbt7.s
+#ASM_SOURCES =startup_at32f415cbt7.s
 
 #######################################
 # Misc files
@@ -87,6 +84,7 @@ SZ = $(BINPATH)$(PREFIX)size
 HEX = $(CP) -O ihex
 BIN = $(CP) -O binary -S
 
+VERBOSE =@
 ifeq ($(GCC_COLORS), )
 export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
 #unexport GCC_COLORS
@@ -95,16 +93,16 @@ endif
 # CFLAGS
 #######################################
 # cpu
-CPU = -mcpu=cortex-m4
+CPU =-mcpu=cortex-m4
 
 # fpu
-# NONE
+# FPU =
 
 # float-abi
 FLOAT-ABI = #-u_printf_float
 
 # mcu
-MCU = $(CPU) -mthumb $(FPU) $(FLOAT-ABI)
+MCU = $(CPU) $(FPU) $(FLOAT-ABI) -mthumb
 
 # macros for gcc
 # AS defines
@@ -148,8 +146,8 @@ LDFLAGS = $(MCU) $(SPECS) -T$(LDSCRIPT) $(LIBDIR) $(LIBS) -Wl,-Map=$(BUILD_DIR)/
 # Rules
 #######################################
 # default action: build all
-all: $(BUILD_DIR)/$(TARGET).elf $(BUILD_DIR)/$(TARGET).bin size
-
+all: $(BUILD_DIR)/$(TARGET).elf size
+#$(BUILD_DIR)/$(TARGET).bin 
 
 program: $(BUILD_DIR)/$(TARGET).elf
 	openocd -f $(OCD_CONFIG) -c "program $(BUILD_DIR)/$(TARGET).elf verify reset exit"
@@ -170,39 +168,39 @@ VPATH +=$(SOURCES_PATH)
 
 $(BUILD_DIR)/%.o: %.c $(BUILD_DIR)
 	@echo "CC  " $<
-	@$(CC) -c $(CFLAGS) $< -o $@
+	$(VERBOSE)$(CC) -c $(CFLAGS) $< -o $@
 
 $(BUILD_DIR)/%.obj: %.cpp $(BUILD_DIR)
 	@echo "CP  " $<
-	@$(CPP) -c $(CPPFLAGS)  -fno-exceptions -fno-unwind-tables -fno-rtti $< -o $@
+	$(VERBOSE)$(CPP) -c $(CPPFLAGS)  -fno-exceptions -fno-unwind-tables -fno-rtti $< -o $@
 
 $(BUILD_DIR)/%.o: %.s $(BUILD_DIR)
 	@echo "AS " $<
-	@$(AS) -c $(CFLAGS) $< -o $@
+	$(VERBOSE)$(AS) -c $(CFLAGS) $< -o $@
 
 $(BUILD_DIR)/$(TARGET).elf: $(OBJECTS) #Makefile
 	@echo "--- Linking ---"
-	@$(CC) $(OBJECTS) $(LDFLAGS) -o $@
+	$(VERBOSE)$(CC) $(OBJECTS) $(LDFLAGS) -o $@
 
 $(BUILD_DIR)/%.hex: $(BUILD_DIR)/%.elf | $(BUILD_DIR)
-	$(HEX) $< $@
+	$(VERBOSE)$(HEX) $< $@
 	
 $(BUILD_DIR)/%.bin: $(BUILD_DIR)/%.elf | $(BUILD_DIR)
-	$(BIN) $< $@	
+	$(VERBOSE)$(BIN) $< $@	
 	
 $(BUILD_DIR):
 	mkdir -p $@		
 
 size: $(BUILD_DIR)/$(TARGET).elf
 	@echo "--- Size ---"
-	$(SZ) -A -x $<
-	$(SZ) -B $<
+	$(VERBOSE)$(SZ) -A -x $<
+	$(VERBOSE)$(SZ) -B $<
 
 #######################################
 # clean up
 #######################################
 clean:
-	-rm -fR $(BUILD_DIR)
+	$(VERBOSE)-rm -fR $(BUILD_DIR)
   
 #######################################
 # dependencies

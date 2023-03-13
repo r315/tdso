@@ -197,9 +197,9 @@ void LCD_Init(void *spi){
 
     spidev = (spibus_t*)spi;
 
-	if(spidev->dma.per != NULL){
-		spidev->eot_cb = LCD_EOTHandler;
-	}
+    if(spidev->dma.per != NULL){
+        spidev->eot_cb = LCD_EOTHandler;
+    }
 
     LCD_CD0;
     LCD_CS1;

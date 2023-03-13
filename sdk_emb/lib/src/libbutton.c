@@ -21,7 +21,6 @@ void BUTTON_Init(int ht){
     __button.last = BUTTON_EMPTY;
     __button.events = BUTTON_EMPTY;
     __button.htime = ht;
-	BUTTON_HW_INIT;
 }
 
 int BUTTON_Read(void){
