@@ -2,24 +2,18 @@
 # project files
 #########################################################
 TARGET =tdso
-TARGET_PATH =.
-LIB_PATH :=../../sdk_emb/lib
-DRIVER_PATH :=../../sdk_emb/drv
-APP_PATH :=../../app
+TARGET_PATH =$(CURDIR)
 BUILD_DIR :=build
+ROOT_PATH :=$(CURDIR)/../..
+LIB_PATH :=$(ROOT_PATH)/sdk_emb/lib
+APP_PATH :=$(ROOT_PATH)/app
 
 CSRCPATH =\
 $(LIB_PATH)/src \
-$(DRIVER_PATH)/src \
 $(APP_PATH) \
 
 INCSPATH =\
 $(LIB_PATH)/inc \
-$(DRIVER_PATH)/inc \
-$(TARGET_PATH) \
-$(TARGET_PATH)/../bluepill/STM32F1xx_HAL_Driver/Inc \
-$(TARGET_PATH)/../bluepill/CMSIS/Include \
-$(TARGET_PATH)/../bluepill/CMSIS/Device/ST/STM32F1xx/Include \
 $(APP_PATH) \
 
 CSRCS =\
@@ -49,6 +43,7 @@ OBJDUMP = $(GCC_EXEC_PREFIX)-objdump
 DBG = $(GCC_EXEC_PREFIX)-insight
 JLINK =JLinkExe
 REMOVE = rm -fR
+VERBOSE =@
 ##########################################################
 
 OBJECTS =$(addprefix $(BUILD_DIR)/, $(CSRCS:.c=.o)) $(addprefix $(BUILD_DIR)/,$(ASRCS:.s=.o))
@@ -61,30 +56,30 @@ all: $(TARGET).bin stats
 	
 $(TARGET).axf:  $(OBJECTS)
 	@echo "---- Linking ---->" $@
-	@$(GCC) $(LDFLAGS) -T$(LDSCRIPT) $(addprefix -L, $(LIBSPATH)) -o "$(TARGET).axf" $(OBJECTS) $(LIBS)
+	$(VERBOSE)$(GCC) $(LDFLAGS) -T$(LDSCRIPT) $(addprefix -L, $(LIBSPATH)) -o "$(TARGET).axf" $(OBJECTS) $(LIBS)
 #arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -mfloat-abi=soft -T"../STM32F103C8Tx_FLASH.ld" -Wl,-Map=output.map -Wl,--gc-sections -o "TDSO.elf" @"objects.list"   -lm
 
 $(TARGET).hex: $(TARGET).axf
-	@$(OBJCOPY) -O ihex -j .text -j .data $(TARGET).axf $(TARGET).hex
+	$(VERBOSE)$(OBJCOPY) -O ihex -j .text -j .data $(TARGET).axf $(TARGET).hex
 
 $(TARGET).bin: $(TARGET).axf
-	@$(OBJCOPY) -O binary -j .text -j .data $(TARGET).axf $(TARGET).bin
+	$(VERBOSE)$(OBJCOPY) -O binary -j .text -j .data $(TARGET).axf $(TARGET).bin
 
 stats: $(TARGET).axf
 	@echo "---- Sections Summary ---"
-	@$(SIZE) -A -x $<
-	@$(SIZE) -t  $<
+	$(VERBOSE)$(SIZE) -A -x $<
+	$(VERBOSE)$(SIZE) -t  $<
 
 aslist: $(TARGET).axf
-	@$(OBJDUMP) -D $(TARGET).axf > $(TARGET).lst
+	$(VERBOSE)$(OBJDUMP) -D $(TARGET).axf > $(TARGET).lst
 	
 dis: $(TARGET).axf
-	@$(OBJDUMP) -S $(TARGET).axf > $(TARGET).lst
+	$(VERBOSE)$(OBJDUMP) -S $(TARGET).axf > $(TARGET).lst
 
 
 clean:
 #$(REMOVE) $(OBJECTS) $(XOBJS) $(TARGET) $(TARGET).exe $(TARGET).hex $(TARGET).axf *.bin libemu.a
-	$(REMOVE) $(BUILD_DIR)
+	$(VERBOSE)$(REMOVE) $(BUILD_DIR)
 	
 $(BUILD_DIR):
 	mkdir -p $@	
@@ -92,7 +87,7 @@ $(BUILD_DIR):
 rebuild: clean all
 
 debug:	$(TARGET).axf
-	$(DBG) $(TARGET).axf
+	$(VERBOSE)$(DBG) $(TARGET).axf
 	
 doc:
 	doxygen difs.txt
@@ -117,11 +112,11 @@ program: $(TARGET).axf $(TARGET).cfg
 
 $(BUILD_DIR)/%.o : %.c | $(BUILD_DIR)
 	@echo "---- Compile" $< "---->" $@
-	@$(GCC) $(GCFLAGS) $(addprefix -I, $(INCSPATH)) $(addprefix -D, $(GCSYMBOLS))  -c $< -o $@
+	$(VERBOSE)$(GCC) $(GCFLAGS) $(addprefix -I, $(INCSPATH)) $(addprefix -D, $(GCSYMBOLS))  -c $< -o $@
 	
 $(BUILD_DIR)/%.o : %.s
 	@echo "---- Assemble" $< "---->" $@
-	@$(AS) $(ASFLAGS) $< -o $@
+	$(VERBOSE)$(AS) $(ASFLAGS) $< -o $@
 	
 
 ########################################################
