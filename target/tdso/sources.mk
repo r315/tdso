@@ -22,7 +22,7 @@ BSP_SOURCES = \
 board_tdso.c \
 spi_stm32f1xx.c \
 dma_stm32f1xx.c \
-ili9341.c\
+ili9341.c \
 startup_stm32f103.c \
 
 HAL_SOURCES = \

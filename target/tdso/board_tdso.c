@@ -1,5 +1,8 @@
 #include "board.h"
 #include "spi.h"
+#include "libbutton.h"
+#include "liblcd.h"
+#include "lib2d.h"
 
 ADC_HandleTypeDef hadc1;
 ADC_HandleTypeDef hadc2;

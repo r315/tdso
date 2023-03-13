@@ -8,9 +8,6 @@ extern "C" {
 #include "stm32f1xx.h"
 #include "stm32f1xx_hal.h"
 #include "ili9341.h"
-#include "libbutton.h"
-#include "liblcd.h"
-#include "lib2d.h"
 
 #ifndef BOARD_TDSO
 #define BOARD_TDSO
@@ -156,10 +153,7 @@ void Board_Init(void);
 uint16_t SPI_Send(uint16_t data);
 
 #define _Error_Handler(__FILE__, __LINE__)
- 
-#define OFF 0
-#define ON 1 
- 
+
 #ifdef __cplusplus
 }
 #endif

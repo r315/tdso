@@ -56,6 +56,13 @@
 #define ILI9341_MADCTL_BGR 0x08
 #define ILI9341_MADCTL_MH  0x04
 
+enum {
+    LCD_PORTRAIT = 0,
+    LCD_LANDSCAPE,
+    LCD_REVERSE_PORTRAIT,
+    LCD_REVERSE_LANDSCAPE
+};
+
 void LCD_Init(void *param);
 void LCD_FillRect(uint16_t x, uint16_t y,  uint16_t w, uint16_t h, uint16_t color);
 void LCD_Pixel(uint16_t x, uint16_t y, uint16_t color);

@@ -22,11 +22,11 @@ lib2d.c \
 liblcd.c \
 font.c \
 dso.c \
+tdso.c \
 control.c \
 power.c \
-tdso.c \
+tdso_test.c \
 tdso_util.c \
-tests.c \
 sample_engine.c \
 
 #########################################################
@@ -44,6 +44,7 @@ DBG = $(GCC_EXEC_PREFIX)-insight
 JLINK =JLinkExe
 REMOVE = rm -fR
 VERBOSE =@
+FULL_PATH =
 ##########################################################
 
 OBJECTS =$(addprefix $(BUILD_DIR)/, $(CSRCS:.c=.o)) $(addprefix $(BUILD_DIR)/,$(ASRCS:.s=.o))
@@ -51,11 +52,12 @@ VPATH += $(CSRCPATH)
 
 -include $(TARGET_PATH)/sources.mk
 
-all: $(TARGET).bin stats
+all: $(TARGET).bin size
 
 	
 $(TARGET).axf:  $(OBJECTS)
-	@echo "---- Linking ---->" $@
+	@echo "---- Linking ---- "
+	@echo $@
 	$(VERBOSE)$(GCC) $(LDFLAGS) -T$(LDSCRIPT) $(addprefix -L, $(LIBSPATH)) -o "$(TARGET).axf" $(OBJECTS) $(LIBS)
 #arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -mfloat-abi=soft -T"../STM32F103C8Tx_FLASH.ld" -Wl,-Map=output.map -Wl,--gc-sections -o "TDSO.elf" @"objects.list"   -lm
 
@@ -65,7 +67,7 @@ $(TARGET).hex: $(TARGET).axf
 $(TARGET).bin: $(TARGET).axf
 	$(VERBOSE)$(OBJCOPY) -O binary -j .text -j .data $(TARGET).axf $(TARGET).bin
 
-stats: $(TARGET).axf
+size: $(TARGET).axf
 	@echo "---- Sections Summary ---"
 	$(VERBOSE)$(SIZE) -A -x $<
 	$(VERBOSE)$(SIZE) -t  $<
@@ -82,7 +84,7 @@ clean:
 	$(VERBOSE)$(REMOVE) $(BUILD_DIR)
 	
 $(BUILD_DIR):
-	mkdir -p $@	
+	$(VERBOSE)mkdir -p $@	
 	
 rebuild: clean all
 
@@ -110,12 +112,12 @@ program: $(TARGET).axf $(TARGET).cfg
 	openocd -f $(TARGET).cfg -c "program $(TARGET).axf verify reset exit"
 
 
-$(BUILD_DIR)/%.o : %.c | $(BUILD_DIR)
-	@echo "---- Compile" $< "---->" $@
+$(BUILD_DIR)/%.o : %.c $(BUILD_DIR)
+	@echo "CC  " $<
 	$(VERBOSE)$(GCC) $(GCFLAGS) $(addprefix -I, $(INCSPATH)) $(addprefix -D, $(GCSYMBOLS))  -c $< -o $@
 	
 $(BUILD_DIR)/%.o : %.s
-	@echo "---- Assemble" $< "---->" $@
+	@echo "AS  " $<
 	$(VERBOSE)$(AS) $(ASFLAGS) $< -o $@
 	
 

@@ -1,5 +1,8 @@
 #include "dso.h"
-#include <board.h>
+#include "board.h"
+#include "libbutton.h"
+#include "liblcd.h"
+#include "tdso_util.h"
 
 void TEST_Run(void);
 

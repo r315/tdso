@@ -7,6 +7,7 @@
 
 #include "board.h"
 #include "power.h"
+#include "tdso_util.h"
 
 #define VREFINT_CHANNEL	17
 #define VREFINT_VALUE 	1200.0f

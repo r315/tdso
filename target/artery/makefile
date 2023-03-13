@@ -17,23 +17,25 @@ endif
 #######################################
 # paths
 #######################################
-ARTERY_SDK_ROOT =$(CURDIR)
-DRIVERS_PATH  =$(ARTERY_SDK_ROOT)/Drivers
-APP_SRC_PATH :=$(CURDIR)
 BUILD_DIR :=build
-SDK_PATH :=$(CURDIR)/../../sdk_emb
+ROOT_PATH :=$(CURDIR)/../..
+TARGET_PATH =$(CURDIR)
+DRIVERS_PATH  =$(TARGET_PATH)/Drivers
+APP_PATH :=$(ROOT_PATH)/app
+SDK_PATH :=$(ROOT_PATH)/sdk_emb
 SDK_DRIVERS_PATH :=$(SDK_PATH)/drv
 SDK_LIB_PATH :=$(SDK_PATH)/lib
-CMSIS_PATH :=$(CURDIR)/../../target/CMSIS_5-5.9.0
+CMSIS_PATH :=$(ROOT_PATH)/target/CMSIS_5-5.9.0
 
 SOURCES_PATH =  \
-$(APP_SRC_PATH) \
+$(APP_PATH) \
 $(DRIVERS_PATH)/StdPeriph_Driver/src \
-$(ARTERY_SDK_ROOT)/Startup \
 $(SDK_DRIVERS_PATH)/src \
+$(SDK_LIB_PATH)/src \
 
 C_INCLUDES =  \
-$(APP_SRC_PATH) \
+$(APP_PATH) \
+$(TARGET_PATH) \
 $(SDK_DRIVERS_PATH)/inc \
 $(SDK_LIB_PATH)/inc \
 $(DRIVERS_PATH)/StdPeriph_Driver/inc \
@@ -43,11 +45,10 @@ $(CMSIS_PATH)/CMSIS/Core/Include \
 AS_INCLUDES =\
 
 ######################################
-# source
+# sources
 ######################################
 
-# C sources
-C_SOURCES =  \
+BOARD_SOURCES = \
 startup_at32f415cbt7.c\
 board_artery.c \
 at32f4xx_rcc.c \
@@ -55,6 +56,20 @@ spi_at32f4xx.c \
 dma_at32f4xx.c \
 gpio_at32f4xx.c \
 ili9341.c \
+sample_engine.c \
+
+C_SOURCES = \
+$(BOARD_SOURCES) \
+liblcd.c \
+lib2d.c \
+libbutton.c \
+font.c \
+control.c \
+tdso.c \
+dso.c \
+power.c \
+tdso_util.c \
+tdso_test.c \
 
 
 # ASM sources
@@ -65,10 +80,10 @@ ili9341.c \
 #######################################
 
 # Linker script
-LDSCRIPT :=$(APP_SRC_PATH)/AT32F415xB_FLASH.ld
+LDSCRIPT :=$(TARGET_PATH)/AT32F415xB_FLASH.ld
 
 # Openocd configuration
-OCD_CONFIG =$(APP_SRC_PATH)/at32f415.cfg
+OCD_CONFIG =$(TARGET_PATH)/at32f415.cfg
 
 #######################################
 # binaries
@@ -130,17 +145,15 @@ CPPFLAGS +=$(DEBUGFLAGS)
 #CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -Wa,-a,-ad,-alms=$(BUILD_DIR)/$(notdir $(<:.c=.lst))
 
 #######################################
-# LDFLAGS
+# linker
 #######################################
-# link script
 
-
-SPECS =-specs=nano.specs
+SPECS =--specs=nano.specs
 # libraries
-#LIBS =-nostartfiles -nostdlib
-LIBS =-lstdc++#-lnosys -lm
-LIBDIR = 
-LDFLAGS = $(MCU) $(SPECS) -T$(LDSCRIPT) $(LIBDIR) $(LIBS) -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref -Wl,--gc-sections
+#-nostartfiles -nostdlib -lstd++ -lnosys -lm 
+#LDLIBS =-nostartfiles -lc -lrdimon --specs=rdimon.specs #for semihosting
+LDLIBS_PATH =
+LDFLAGS = $(MCU) $(SPECS) -T$(LDSCRIPT) $(LDLIBS_PATH) $(LDLIBS) -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref -Wl,--gc-sections
 
 #######################################
 # Rules
@@ -180,6 +193,7 @@ $(BUILD_DIR)/%.o: %.s $(BUILD_DIR)
 
 $(BUILD_DIR)/$(TARGET).elf: $(OBJECTS) #Makefile
 	@echo "--- Linking ---"
+	@echo $@
 	$(VERBOSE)$(CC) $(OBJECTS) $(LDFLAGS) -o $@
 
 $(BUILD_DIR)/%.hex: $(BUILD_DIR)/%.elf | $(BUILD_DIR)

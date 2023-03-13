@@ -81,10 +81,6 @@ extern "C" {
 #define DSO_MAX_SAMPLES 		2048
 #define DSO_SAMPLE_MAX_VALUE 	4096
 
-#define ON 1
-#define OFF 0
-enum {false = 0, true};
-
 #define TB_1MS 					1000
 #define TB_1MS_IDX 				6
 #define VS_1V 1000

@@ -35,7 +35,7 @@
 #elif defined(__EMU__) || defined(__BLUEBOARD__)
 
 #else
-#error config board
+//#error config board
 #endif
 
 void CONTROL_Init(Dso *dso);

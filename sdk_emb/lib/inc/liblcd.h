@@ -43,14 +43,6 @@ extern "C" {
     #define RGB565(r,g,b)  (uint16_t)(((r & 31) << 11) | ((g & 63) << 5) | (b & 31))
 #endif
 
-enum {
-    LCD_PORTRAIT = 0,
-    LCD_LANDSCAPE,
-    LCD_REVERSE_PORTRAIT,
-    LCD_REVERSE_LANDSCAPE
-};
-
-
 void LCD_Init(void *param);
 void LCD_Rect(uint16_t x, uint16_t y,  uint16_t w, uint16_t h, uint16_t color);
 void LCD_FillRect(uint16_t x, uint16_t y,  uint16_t w, uint16_t h, uint16_t color);

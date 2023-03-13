@@ -1,6 +1,7 @@
 #include "board.h"
 #include "dso.h"
 #include "tdso_util.h"
+#include "lib2d.h"
 
 
 volatile uint32_t time;

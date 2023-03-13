@@ -1,21 +1,35 @@
 #include "board.h"
 #include "spi.h"
 #include "gpio.h"
+#include "libbutton.h"
+#include "lib2d.h"
+#include "liblcd.h"
 
 #define VECT_TAB_OFFSET  0x0
 
 uint32_t SystemCoreClock;
 static const uint8_t AHBPscTable[16] = {0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 6, 7, 8, 9};
 static spibus_t spibus;
-static volatile uint32_t tickms;
+static volatile uint32_t ticms;
+
+void TDSO(void);
 
 void SysTick_Handler(void){
-    tickms++;
+    ticms++;
 }
 
 void DelayMs(uint32_t ms){
-  __IO uint32_t end = tickms + ms; 
-  while(tickms < end){}
+  __IO uint32_t end = ticms + ms; 
+  while(ticms < end){}
+}
+
+uint32_t ElapsedTicks(uint32_t start_ticks){ 
+    uint32_t current = ticms; 
+    return (current > start_ticks) ? current - start_ticks : 0xFFFFFFFF - start_ticks + current;
+}
+
+inline uint32_t GetTick(void){
+  return ticms;
 }
 
 void SystemCoreClockUpdate (void)
@@ -267,7 +281,7 @@ int main(void)
     SystemInit();
 
     spibus.bus = SPI_BUS0;
-    spibus.freq = 1000;
+    spibus.freq = SPI_FREQ;
     spibus.flags = SPI_HW_CS;
     SPI_Init(&spibus);
 
@@ -275,9 +289,11 @@ int main(void)
     LCD_PIN_INIT;
 
     LCD_Init(&spibus);
+    LCD_Clear(LCD_BLACK);
 
-    LCD_FillRect(0,0, 240, 320, LCD_RED);
-    LCD_Bkl(1);
+    LIB2D_Init();
+    BUTTON_Init(200);
+    TDSO();
 
     while(1){
         LED_TOGGLE;

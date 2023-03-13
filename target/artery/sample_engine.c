@@ -7,6 +7,7 @@
 #include "board.h"
 #include "tdso_util.h"
 
+#if defined(BOARD_TDSO)
 #define ENABLE_ADC_TRIGGER_OUTPUT   0
 
 #define SAMPLE_RATE_TIMER_FREQ    18   // this values ensures a maximum of 1Msps with rising edge of OC4REF
@@ -257,3 +258,13 @@ void DMA1_Channel1_IRQHandler(void){
 
     DMA1->IFCR |= DMA_IFCR_CGIF1;  // Clear DMA Flags TODO: ADD DMA Error handling ?
 }
+#else
+void CAP_Init(void){}
+void CAP_Start(int16_t *dst, uint16_t size){}
+uint8_t CAP_IsEnded(void){ return true;}
+void CAP_SetSampleRate(uint32_t tb_us){}
+void CAP_SetTrigger(uint16_t level){}
+uint16_t CAP_GetTriggerOffset(void){return 0;}
+uint8_t CAP_Triggered(void){return true;}
+void CAP_SetTriggerEdge(uint8_t rising){}
+#endif

@@ -9,8 +9,13 @@ extern "C" {
 #include <stddef.h>
 #include <stdint.h>
 #include "at32f4xx.h"
+#include "gpio.h"
 #include "gpio_at32f4xx.h"
-#include "liblcd.h"
+#include "ili9341.h"
+
+#define BOARD_ARTERY
+
+#define SPI_FREQ    18000 //kHz
 
 #define LCD_IO_SET(port, pinmask) port->BSRE = pinmask
 #define LCD_IO_RESET(port, pinmask) port->BRE = pinmask
@@ -56,7 +61,7 @@ extern "C" {
 #define BUTTON_LEFT2	(1<<9)
 #define BUTTON_RIGHT2	(1<<12)
 
-#define BUTTON_HW_READ  (~GPIOB->IDR & BUTTON_MASK)
+#define BUTTON_HW_READ  (~GPIOB->IPTDT & BUTTON_MASK)
 #define BUTTON_MASK     (BUTTON_LEFT | BUTTON_RIGHT | BUTTON_A | BUTTON_LEFT2 | BUTTON_RIGHT2)
 
 #define LED_PIN         PB_3
@@ -70,6 +75,9 @@ extern "C" {
 #define LED_TOGGLE      GPIO_Toggle(LED_PIN)
 
 void DelayMs(uint32_t ms);
+uint32_t ElapsedTicks(uint32_t start_ticks);
+uint32_t GetTick(void);
+
 #ifdef __cplusplus
 }
 #endif

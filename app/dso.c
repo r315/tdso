@@ -1,11 +1,14 @@
 #include <string.h>
-#include "board.h"
 #include <math.h>
+#include "board.h"
 #include "dso.h"
 #include "tdso_util.h"
 #include "capture.h"
 #include "control.h"
 #include "power.h"
+#include "libbutton.h"
+#include "liblcd.h"
+#include "lib2d.h"
 
 
 static Dso dso;
@@ -753,7 +756,7 @@ uint32_t i, sidx;
 }
 
 void DSO_SystemInfo(void){
-	LIB2D_Print("System Clock: %uHz\n", SystemCoreClock);
+	LIB2D_Print("System Clock: %uMHz\n", SystemCoreClock / 1000000UL);
 	LIB2D_Print("Sample Memory: %u bytes\n",DSO_MAX_CHANNELS * DSO_MAX_SAMPLES);
     LIB2D_Print("Version: %s\n", DSO_VERSION);
 #ifdef LCD_USE_ID
