@@ -110,6 +110,8 @@ void LIB2D_SetFcolor(uint16_t color){ lib2d.forecolor = color;}
 void LIB2D_SetBcolor(uint16_t color){ lib2d.backcolor = color;}
 uint16_t LIB2D_GetFontWidth(void){ return lib2d.font->w; }
 uint16_t LIB2D_GetFontHeight(void){ return lib2d.font->h; }
+uint16_t LIB2D_GetCursorX(void){ return lib2d.cx; }
+uint16_t LIB2D_GetCursorY(void){ return lib2d.cy; }
 
 void LIB2D_SetPos(uint16_t x, uint16_t y){
    	lib2d.cx = x;

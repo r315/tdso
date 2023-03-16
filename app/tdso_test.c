@@ -119,7 +119,7 @@ void TEST_MultiSwitch(void){
    
     val = BUTTON_GetValue();
 
-    LIB2D_SetPos(0, SWITCH_BAR_Y);
+    LIB2D_SetPos(SWITCH_BAR_X + SWITCH_BAR_WIDTH + 4, SWITCH_BAR_Y);
     LIB2D_Print("%4X", val);
 
     if(val & BUTTON_LEFT){
@@ -201,7 +201,7 @@ void TEST_BatteryVoltage(void)
     static uint32_t time;
 
     if(GetTick() - time > 1000){
-        uint16_t vbat = POWER_GetBatVoltage();
+        float vbat = POWER_GetBatVoltage() / 1000.0f;
         LIB2D_SetCursor(0, BAT_VOLTAGE_Y);
 		LIB2D_Print("BAT: %4umV\n", vbat);	
         time = GetTick();
@@ -213,6 +213,27 @@ void TEST_Run(void){
     LIB2D_Print("Test mode\n");
     TEST_BlinkLed(3);
 
+#if defined(__FPU_USED) && (__FPU_USED == 1U)
+    volatile float a = 123.456f;
+    volatile float b = 654.321f;
+    volatile float c = a * b;
+    if(c != 0.0f){
+        LIB2D_Print("FPU ok\n");
+    }
+#endif
+
+#if defined(__ARM_FEATURE_DSP) && (__ARM_FEATURE_DSP == 1U)
+    volatile uint32_t a = 0x12345678;
+    volatile uint32_t b = 0x00010002;
+    volatile uint32_t c;
+
+    __ASM ("qadd16 %0, %1, %2" : "=r" (c) : "r" (a), "r" (b) );
+
+    if(c == 0x1235567A){
+        LIB2D_Print("DSP ok\n");
+    }
+#endif
+
 #if defined(BOARD_TDSO)
     //TEST_Config_DMA();
     //TEST_Enable_ADC();
@@ -222,6 +243,7 @@ void TEST_Run(void){
     TEST_MultiSwitchSliderBorder(LCD_GREEN);
     POWER_CalibrateADC();
 #endif
+    
     while(1){
         //TEST_Capture();
         //TEST_FrontendSelector(&idx);

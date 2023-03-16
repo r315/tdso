@@ -35,6 +35,8 @@ uint16_t LIB2D_GetFontWidth(void);
 uint16_t LIB2D_GetFontHeight(void);
 void LIB2D_SetCursor(uint16_t x, uint16_t y);
 void LIB2D_SetPos(uint16_t x, uint16_t y);
+uint16_t LIB2D_GetCursorX(void);
+uint16_t LIB2D_GetCursorY(void);
 
 void LIB2D_Rect(uint16_t x, uint16_t y,  uint16_t w, uint16_t h);
 void LIB2D_FillRect(uint16_t x, uint16_t y,  uint16_t w, uint16_t h);
