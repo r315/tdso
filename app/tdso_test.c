@@ -102,7 +102,7 @@ void TEST_MultiSwitch(void){
     uint32_t val;     
 
     if(BUTTON_Read() == BUTTON_EMPTY){
-        LIB2D_SetPos(0, SWITCH_BAR_Y);
+        LIB2D_SetPos(SWITCH_BAR_X + SWITCH_BAR_WIDTH + 4, SWITCH_BAR_Y);
         LIB2D_Print("%04X", 0);
         return;
     }
@@ -201,7 +201,7 @@ void TEST_BatteryVoltage(void)
     static uint32_t time;
 
     if(GetTick() - time > 1000){
-        float vbat = POWER_GetBatVoltage() / 1000.0f;
+        uint16_t vbat = POWER_GetBatVoltage();
         LIB2D_SetCursor(0, BAT_VOLTAGE_Y);
 		LIB2D_Print("BAT: %4umV\n", vbat);	
         time = GetTick();

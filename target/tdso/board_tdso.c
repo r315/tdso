@@ -4,17 +4,7 @@
 #include "liblcd.h"
 #include "lib2d.h"
 
-ADC_HandleTypeDef hadc1;
 ADC_HandleTypeDef hadc2;
-DMA_HandleTypeDef hdma_adc1;
-
-I2C_HandleTypeDef hi2c1;
-
-TIM_HandleTypeDef htim2;
-TIM_HandleTypeDef htim3;
-TIM_HandleTypeDef htim4;
-
-UART_HandleTypeDef huart1;
 
 const uint8_t AHBPrescTable[16U] = {0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 6, 7, 8, 9};
 const uint8_t APBPrescTable[8U] = {0, 0, 0, 0, 1, 2, 3, 4};
@@ -24,11 +14,8 @@ static spibus_t spibus;
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_DMA_Init(void);
-static void MX_ADC1_Init(void);
-static void MX_TIM2_Init(void);
 static void MX_ADC2_Init(void);
 
-void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
 void TDSO(void);
 
 int main(void)
@@ -37,20 +24,12 @@ int main(void)
     SystemClock_Config();
     MX_GPIO_Init();
     MX_DMA_Init();
-    MX_ADC1_Init();
     MX_ADC2_Init();
-    MX_TIM2_Init();
    
     spibus.bus = SPI_BUS0;
     spibus.freq = 9000;
     spibus.flags = SPI_HW_CS;
     SPI_Init(&spibus);
-
-    HAL_TIM_Base_Start(&htim2);
-    HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
-
-    HAL_TIM_Base_Start(&htim2);
-    HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_4);
 
     ADC_Enable(&hadc2); // enable soft power button adc
 
@@ -101,57 +80,14 @@ void SystemClock_Config(void)
     HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
 }
 
-/* ADC1 init function */
-static void MX_ADC1_Init(void)
-{
-    ADC_InjectionConfTypeDef sConfigInjected;
-    ADC_ChannelConfTypeDef sConfig;
-
-    /**Common config
-     */
-    hadc1.Instance = ADC1;
-    hadc1.Init.ScanConvMode = ADC_SCAN_DISABLE;
-    hadc1.Init.ContinuousConvMode = DISABLE;
-    hadc1.Init.DiscontinuousConvMode = DISABLE;
-    hadc1.Init.ExternalTrigConv = ADC_EXTERNALTRIGCONV_T4_CC4;
-    hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
-    hadc1.Init.NbrOfConversion = 1;
-    if (HAL_ADC_Init(&hadc1) != HAL_OK)
-    {
-        _Error_Handler(__FILE__, __LINE__);
-    }
-
-    /**Configure Injected Channel
-     */
-    sConfigInjected.InjectedChannel = ADC_CHANNEL_0;
-    sConfigInjected.InjectedRank = 1;
-    sConfigInjected.InjectedNbrOfConversion = 1;
-    sConfigInjected.InjectedSamplingTime = ADC_SAMPLETIME_1CYCLE_5;
-    sConfigInjected.ExternalTrigInjecConv = ADC_INJECTED_SOFTWARE_START;
-    sConfigInjected.AutoInjectedConv = DISABLE;
-    sConfigInjected.InjectedDiscontinuousConvMode = DISABLE;
-    sConfigInjected.InjectedOffset = 0;
-    if (HAL_ADCEx_InjectedConfigChannel(&hadc1, &sConfigInjected) != HAL_OK)
-    {
-        _Error_Handler(__FILE__, __LINE__);
-    }
-
-    /**Configure Regular Channel
-     */
-    sConfig.Channel = ADC_CHANNEL_0;
-    sConfig.Rank = 1;
-    sConfig.SamplingTime = ADC_SAMPLETIME_1CYCLE_5;
-    if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
-    {
-        _Error_Handler(__FILE__, __LINE__);
-    }
-}
 
 /* ADC2 init function */
 static void MX_ADC2_Init(void)
 {
-
+    GPIO_InitTypeDef GPIO_InitStruct;
     ADC_ChannelConfTypeDef sConfig;
+
+    __HAL_RCC_ADC2_CLK_ENABLE();
 
     /**Common config
      */
@@ -176,64 +112,14 @@ static void MX_ADC2_Init(void)
     {
         _Error_Handler(__FILE__, __LINE__);
     }
-}
 
-/* TIM2 init function */
-static void MX_TIM2_Init(void)
-{
-
-    TIM_ClockConfigTypeDef sClockSourceConfig;
-    TIM_MasterConfigTypeDef sMasterConfig;
-    TIM_OC_InitTypeDef sConfigOC;
-
-    htim2.Instance = TIM2;
-    htim2.Init.Prescaler = 32 - 1;
-    htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
-    htim2.Init.Period = 200 - 1;
-    htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-    htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-    if (HAL_TIM_Base_Init(&htim2) != HAL_OK)
-    {
-        _Error_Handler(__FILE__, __LINE__);
-    }
-
-    sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
-    if (HAL_TIM_ConfigClockSource(&htim2, &sClockSourceConfig) != HAL_OK)
-    {
-        _Error_Handler(__FILE__, __LINE__);
-    }
-
-    if (HAL_TIM_PWM_Init(&htim2) != HAL_OK)
-    {
-        _Error_Handler(__FILE__, __LINE__);
-    }
-
-    sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
-    sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-    if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig) != HAL_OK)
-    {
-        _Error_Handler(__FILE__, __LINE__);
-    }
-
-    sConfigOC.OCMode = TIM_OCMODE_PWM1;
-    sConfigOC.Pulse = 79;
-    sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
-    sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
-    if (HAL_TIM_PWM_ConfigChannel(&htim2, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
-    {
-        _Error_Handler(__FILE__, __LINE__);
-    }
-
-    sConfigOC.OCMode = TIM_OCMODE_PWM1;
-    sConfigOC.Pulse = 79;
-    sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
-    sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
-    if (HAL_TIM_PWM_ConfigChannel(&htim2, &sConfigOC, TIM_CHANNEL_4) != HAL_OK)
-    {
-        _Error_Handler(__FILE__, __LINE__);
-    }
-
-    HAL_TIM_MspPostInit(&htim2);
+    /**ADC2 GPIO Configuration    
+    PA1     ------> ADC2_IN1
+    PA2     ------> ADC2_IN2 
+    */
+    GPIO_InitStruct.Pin = VBAT_Pin | POWER_KEY_Pin;
+    GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 }
 
 /**

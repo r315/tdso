@@ -2,49 +2,43 @@
 # 
 #########################################################
 CMSIS_PATH :=$(ROOT_PATH)/target/CMSIS_5-5.9.0
-DRIVER_PATH :=$(ROOT_PATH)/sdk_emb/drv
-
-CSRCPATH += \
-$(TARGET_PATH) \
-$(DRIVER_PATH)/src \
-$(TARGET_PATH)/../bluepill/Src \
-$(TARGET_PATH)/../bluepill/startup \
-$(TARGET_PATH)/../bluepill/STM32F1xx_HAL_Driver/Src \
+SDK_DRIVER_PATH :=$(SDK_PATH)/drv
+BOARD_PATH :=$(TARGET_PATH)/../bluepill
+BOARD_DRIVER_PATH =$(BOARD_PATH)/STM32F1xx_HAL_Driver
 
 INCSPATH += \
-$(TARGET_PATH) \
-$(DRIVER_PATH)/inc \
+$(SDK_DRIVER_PATH)/inc \
 $(CMSIS_PATH)/Device/ST/STM32F1xx/Include \
 $(CMSIS_PATH)/CMSIS/Core/Include \
-$(TARGET_PATH)/../bluepill/STM32F1xx_HAL_Driver/Inc \
+$(BOARD_DRIVER_PATH)/Inc \
 
 BSP_SOURCES = \
-board_tdso.c \
-spi_stm32f1xx.c \
-dma_stm32f1xx.c \
-ili9341.c \
-startup_stm32f103.c \
+$(BOARD_PATH)/board_tdso.c \
+$(BOARD_PATH)/startup_stm32f103.c \
+$(BOARD_PATH)/sample_engine.c \
+$(SDK_DRIVER_PATH)/src/spi_stm32f1xx.c \
+$(SDK_DRIVER_PATH)/src/dma_stm32f1xx.c \
+$(SDK_LIB_PATH)/src/ili9341.c \
 
-HAL_SOURCES = \
-stm32f1xx_hal.c \
-stm32f1xx_hal_dma.c \
-stm32f1xx_hal_pcd.c \
-stm32f1xx_hal_pcd_ex.c \
-stm32f1xx_hal_msp.c \
-stm32f1xx_hal_gpio.c \
-stm32f1xx_hal_tim.c \
-stm32f1xx_hal_rcc.c \
-stm32f1xx_hal_rcc_ex.c \
-stm32f1xx_hal_tim_ex.c \
-stm32f1xx_hal_cortex.c \
-stm32f1xx_hal_adc.c \
-stm32f1xx_hal_adc_ex.c \
-stm32f1xx_hal_spi.c \
+CSRCS += \
+$(BOARD_DRIVER_PATH)/src/stm32f1xx_hal.c \
+$(BOARD_DRIVER_PATH)/src/stm32f1xx_hal_dma.c \
+$(BOARD_DRIVER_PATH)/src/stm32f1xx_hal_pcd.c \
+$(BOARD_DRIVER_PATH)/src/stm32f1xx_hal_pcd_ex.c \
+$(BOARD_DRIVER_PATH)/src/stm32f1xx_hal_gpio.c \
+$(BOARD_DRIVER_PATH)/src/stm32f1xx_hal_tim.c \
+$(BOARD_DRIVER_PATH)/src/stm32f1xx_hal_rcc.c \
+$(BOARD_DRIVER_PATH)/src/stm32f1xx_hal_rcc_ex.c \
+$(BOARD_DRIVER_PATH)/src/stm32f1xx_hal_tim_ex.c \
+$(BOARD_DRIVER_PATH)/src/stm32f1xx_hal_cortex.c \
+$(BOARD_DRIVER_PATH)/src/stm32f1xx_hal_adc.c \
+$(BOARD_DRIVER_PATH)/src/stm32f1xx_hal_adc_ex.c \
+$(BOARD_DRIVER_PATH)/src/stm32f1xx_hal_spi.c \
 
 CSRCS += $(HAL_SOURCES) $(BSP_SOURCES)
 #ASRCS +=startup_stm32f103xb.s
 
-LDSCRIPT ="$(TARGET_PATH)/../bluepill/startup/STM32F103C8Tx_FLASH.ld"
+LDSCRIPT ="$(BOARD_PATH)/startup/STM32F103C8Tx_FLASH.ld"
 
 DEVICE =STM32F103xB
 GCSYMBOLS +=BOARD_TDSO $(DEVICE) USE_HAL_DRIVER __weak='__attribute__((weak))' __packet='__attribute__((__packed__))'

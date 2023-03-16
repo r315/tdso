@@ -16,6 +16,48 @@
 
 //TODO: COnfigure pins
 
+/**
+ * @brief Configures PWM signal on pins PA3 and PA15
+ * 
+ * @param en 
+ */
+static void CONTROL_PWM(uint8_t en){
+	GPIO_InitTypeDef GPIO_InitStruct;
+	//uint32_t ppre1 = (RCC->CFGR >> 11) & 7; // Get PCLK1DIV
+	//ppre1 = (ppre1 == 1) ? HAL_RCC_GetPCLK1Freq() : HAL_RCC_GetPCLK1Freq() << 1;		
+
+	if(en){
+		__HAL_RCC_TIM2_CLK_ENABLE();
+
+		TIM2->CR1 = 0; 			// Disable all
+		TIM2->ARR = 199;
+		TIM2->PSC = 32 - 1; 	//ppre1 / 1000 / TEST_SIG_PERIOD - 1;
+		TIM2->EGR = TIM_EGR_UG; // Generate an update event to reload the Prescaler 
+		TIM2->SMCR = 0;         // No slave
+		TIM2->CCMR1 = TIM_CCMR1_OC1M_2 | TIM_CCMR1_OC1M_1; // CH1 PWM Mode 1
+		TIM2->CCMR2 = TIM_CCMR2_OC4M_2 | TIM_CCMR2_OC4M_1; // CH4 PWM Mode 1
+		TIM2->CCR1 = 79;
+		TIM2->CCR4 = 79;
+		TIM2->CCER = TIM_CCER_CC4E | TIM_CCER_CC1E;
+
+		TIM2->CR1 = TIM_CR1_CEN;
+
+		GPIO_InitStruct.Pin = TG_LEVEL_Pin;
+    	GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+    	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+    	HAL_GPIO_Init(TG_LEVEL_GPIO_Port, &GPIO_InitStruct);
+
+    	GPIO_InitStruct.Pin = V_POS_Pin;
+    	GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+    	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+    	HAL_GPIO_Init(V_POS_GPIO_Port, &GPIO_InitStruct);
+
+    	__HAL_AFIO_REMAP_TIM2_PARTIAL_1();
+	}else{
+
+	}
+}
+
 void CONTROL_SetGain(uint8_t gain){
 	if(gain < CONTROL_GAIN_STAGES)
 		CONTROL_SET_GAIN(gain);
@@ -38,6 +80,7 @@ void CONTROL_SetVpos(Channel *ch){
 }
 
 void CONTROL_Init(Dso *dso){
+	CONTROL_PWM(true);
 	CONTROL_SetGain(dso->channels[DSO_SIGNAL0_CHANNEL].scaleidx);
 	CONTROL_SetTriggerLevel(dso->trigger.pos);
 	CONTROL_SetVpos(&dso->channels[DSO_SIGNAL0_CHANNEL]);
