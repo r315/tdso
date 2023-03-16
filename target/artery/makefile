@@ -1,17 +1,17 @@
 ######################################
 # target
 ######################################
-TARGET =blink
+TARGET =tdso_artery
 
 ######################################
 # building variables
 ######################################
-ifeq ($(RELEASE), 1)
-DEBUG = 1
-OPT = -Os
+ifdef RELEASE
+DEBUG =0
+OPT   =-O2
 else
-DEBUG = 1
-OPT = -Og
+DEBUG =1
+OPT   =-O0 -g -gdwarf-2
 endif
 
 #######################################
@@ -19,26 +19,20 @@ endif
 #######################################
 BUILD_DIR :=build
 ROOT_PATH :=$(CURDIR)/../..
-TARGET_PATH =$(CURDIR)
-DRIVERS_PATH  =$(TARGET_PATH)/Drivers
+BOARD_PATH =$(CURDIR)
+BOARD_DRIVERS_PATH =$(BOARD_PATH)/Drivers/StdPeriph_Driver
 APP_PATH :=$(ROOT_PATH)/app
 SDK_PATH :=$(ROOT_PATH)/sdk_emb
 SDK_DRIVERS_PATH :=$(SDK_PATH)/drv
 SDK_LIB_PATH :=$(SDK_PATH)/lib
 CMSIS_PATH :=$(ROOT_PATH)/target/CMSIS_5-5.9.0
 
-SOURCES_PATH =  \
-$(APP_PATH) \
-$(DRIVERS_PATH)/StdPeriph_Driver/src \
-$(SDK_DRIVERS_PATH)/src \
-$(SDK_LIB_PATH)/src \
-
 C_INCLUDES =  \
 $(APP_PATH) \
-$(TARGET_PATH) \
+$(BOARD_PATH) \
+$(BOARD_DRIVERS_PATH)/inc \
 $(SDK_DRIVERS_PATH)/inc \
 $(SDK_LIB_PATH)/inc \
-$(DRIVERS_PATH)/StdPeriph_Driver/inc \
 $(CMSIS_PATH)/Device/ARTERY/AT32F4xx/Include \
 $(CMSIS_PATH)/CMSIS/Core/Include \
 
@@ -49,27 +43,27 @@ AS_INCLUDES =\
 ######################################
 
 BOARD_SOURCES = \
-startup_at32f415cbt7.c\
-board_artery.c \
-at32f4xx_rcc.c \
-spi_at32f4xx.c \
-dma_at32f4xx.c \
-gpio_at32f4xx.c \
-ili9341.c \
-sample_engine.c \
+$(BOARD_PATH)/startup_at32f415cbt7.c\
+$(BOARD_PATH)/board_artery.c \
+$(BOARD_DRIVERS_PATH)/src/at32f4xx_rcc.c \
+$(SDK_DRIVERS_PATH)/src/spi_at32f4xx.c \
+$(SDK_DRIVERS_PATH)/src/dma_at32f4xx.c \
+$(SDK_DRIVERS_PATH)/src/gpio_at32f4xx.c \
+$(SDK_LIB_PATH)/src/ili9341.c \
+$(BOARD_PATH)/sample_engine.c \
 
 C_SOURCES = \
 $(BOARD_SOURCES) \
-liblcd.c \
-lib2d.c \
-libbutton.c \
-font.c \
-control.c \
-tdso.c \
-dso.c \
-power.c \
-tdso_util.c \
-tdso_test.c \
+$(SDK_LIB_PATH)/src/liblcd.c \
+$(SDK_LIB_PATH)/src/lib2d.c \
+$(SDK_LIB_PATH)/src/libbutton.c \
+$(SDK_LIB_PATH)/src/font.c \
+$(APP_PATH)/control.c \
+$(APP_PATH)/tdso.c \
+$(APP_PATH)/dso.c \
+$(APP_PATH)/power.c \
+$(APP_PATH)/tdso_util.c \
+$(APP_PATH)/tdso_test.c \
 
 
 # ASM sources
@@ -80,10 +74,10 @@ tdso_test.c \
 #######################################
 
 # Linker script
-LDSCRIPT :=$(TARGET_PATH)/AT32F415xB_FLASH.ld
+LDSCRIPT :=$(BOARD_PATH)/AT32F415xB_FLASH.ld
 
 # Openocd configuration
-OCD_CONFIG =$(TARGET_PATH)/at32f415.cfg
+OCD_CONFIG =$(BOARD_PATH)/at32f415.cfg
 
 #######################################
 # binaries
@@ -99,7 +93,6 @@ SZ = $(BINPATH)$(PREFIX)size
 HEX = $(CP) -O ihex
 BIN = $(CP) -O binary -S
 
-VERBOSE =@
 ifeq ($(GCC_COLORS), )
 export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
 #unexport GCC_COLORS
@@ -108,16 +101,17 @@ endif
 # CFLAGS
 #######################################
 # cpu
-CPU =-mcpu=cortex-m4
+CPU =-mcpu=cortex-m4 -mthumb
 
 # fpu
-# FPU =
+#at43f415 does not have FPU
+#FPU =-mfloat-abi=hard -mfpu=fpv4-sp-d16 
 
 # float-abi
 FLOAT-ABI = #-u_printf_float
 
 # mcu
-MCU = $(CPU) $(FPU) $(FLOAT-ABI) -mthumb
+MCU = $(CPU) $(FPU) $(FLOAT-ABI)
 
 # macros for gcc
 # AS defines
@@ -125,33 +119,37 @@ AS_DEFS =
 
 # C defines
 C_DEFS +=\
--DAT32F415CBT7 \
--DUSE_STDPERIPH_DRIVER
+AT32F415CBT7 \
+USE_STDPERIPH_DRIVER
 
 # compile gcc flags
 ASFLAGS = $(MCU) $(AS_DEFS) $(AS_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections
 
-CFLAGS = $(MCU) $(C_DEFS) $(addprefix -I, $(C_INCLUDES)) $(OPT) -Wall -fdata-sections -ffunction-sections -std=gnu11
+CFLAGS = $(MCU) $(addprefix -D, $(C_DEFS)) $(addprefix -I, $(C_INCLUDES)) $(OPT) -Wall -fdata-sections -ffunction-sections -std=gnu11
 CPPFLAGS = $(MCU) $(C_DEFS) $(addprefix -I, $(C_INCLUDES)) $(OPT) -Wall -fdata-sections -ffunction-sections
-
-ifeq ($(DEBUG), 1)
-DEBUGFLAGS =-g -gdwarf-2
-endif
-
-CFLAGS +=$(DEBUGFLAGS)
-CPPFLAGS +=$(DEBUGFLAGS)
 
 # Generate dependency information
 #CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -Wa,-a,-ad,-alms=$(BUILD_DIR)/$(notdir $(<:.c=.lst))
 
+ifndef V
+VERBOSE =@
+else
+VERBOSE =
+endif
 #######################################
 # linker
 #######################################
 
-SPECS =--specs=nano.specs
 # libraries
-#-nostartfiles -nostdlib -lstd++ -lnosys -lm 
-#LDLIBS =-nostartfiles -lc -lrdimon --specs=rdimon.specs #for semihosting
+ifdef SEMIHOSTING
+SPECS =--specs=rdimon.specs
+LDLIBS =-nostartfiles -lc -lrdimon
+else
+SPECS =--specs=nano.specs
+#-nostdlib -lstd++ -lnosys -lm 
+LDLIBS =
+endif
+
 LDLIBS_PATH =
 LDFLAGS = $(MCU) $(SPECS) -T$(LDSCRIPT) $(LDLIBS_PATH) $(LDLIBS) -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref -Wl,--gc-sections
 
@@ -173,21 +171,20 @@ OBJECTS = $(addprefix $(BUILD_DIR)/,$(notdir $(C_SOURCES:.c=.o)))
 #vpath %.c $(sort $(dir $(C_SOURCES)))
 OBJECTS += $(addprefix $(BUILD_DIR)/,$(notdir $(CPP_SOURCES:.cpp=.obj)))
 #vpath %.cpp $(sort $(dir $(CPP_SOURCES)))
-# list of ASM program objects
 OBJECTS += $(addprefix $(BUILD_DIR)/,$(notdir $(ASM_SOURCES:.s=.o)))
 #vpath %.s $(sort $(dir $(ASM_SOURCES)))
 
-VPATH +=$(SOURCES_PATH)
+VPATH +=$(sort $(dir $(C_SOURCES)))
 
-$(BUILD_DIR)/%.o: %.c $(BUILD_DIR)
+$(BUILD_DIR)/%.o: %.c Makefile | $(BUILD_DIR)
 	@echo "CC  " $<
 	$(VERBOSE)$(CC) -c $(CFLAGS) $< -o $@
 
-$(BUILD_DIR)/%.obj: %.cpp $(BUILD_DIR)
+$(BUILD_DIR)/%.obj: %.cpp Makefile | $(BUILD_DIR)
 	@echo "CP  " $<
 	$(VERBOSE)$(CPP) -c $(CPPFLAGS)  -fno-exceptions -fno-unwind-tables -fno-rtti $< -o $@
 
-$(BUILD_DIR)/%.o: %.s $(BUILD_DIR)
+$(BUILD_DIR)/%.o: %.s Makefile | $(BUILD_DIR)
 	@echo "AS " $<
 	$(VERBOSE)$(AS) -c $(CFLAGS) $< -o $@
 
