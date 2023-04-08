@@ -18,23 +18,25 @@ endif
 # paths
 #######################################
 BUILD_DIR :=build
-ROOT_PATH :=$(CURDIR)/../..
-BOARD_PATH =$(CURDIR)
-BOARD_DRIVERS_PATH =$(BOARD_PATH)/Drivers/StdPeriph_Driver
+ROOT_PATH :=$(CURDIR)
+TARGET_PATH =$(CURDIR)
+DRIVERS_PATH :=$(TARGET_PATH)/../Drivers
+DRIVERS_HAL_PATH =$(DRIVERS_PATH)/StdPeriph_Driver
+DRIVERS_CUSTOM_PATH =$(DRIVERS_PATH)/Costum
+DRIVERS_COMPONENT_PATH =$(DRIVERS_PATH)/Component
+CMSIS_PATH :=$(DRIVERS_PATH)/CMSIS
 APP_PATH :=$(ROOT_PATH)/app
-SDK_PATH :=$(ROOT_PATH)/sdk_emb
-SDK_DRIVERS_PATH :=$(SDK_PATH)/drv
-SDK_LIB_PATH :=$(SDK_PATH)/lib
-CMSIS_PATH :=$(ROOT_PATH)/target/CMSIS_5-5.9.0
+LIB_PATH :=$(ROOT_PATH)/lib
 
 C_INCLUDES =  \
 $(APP_PATH) \
-$(BOARD_PATH) \
-$(BOARD_DRIVERS_PATH)/inc \
-$(SDK_DRIVERS_PATH)/inc \
-$(SDK_LIB_PATH)/inc \
-$(CMSIS_PATH)/Device/ARTERY/AT32F4xx/Include \
-$(CMSIS_PATH)/CMSIS/Core/Include \
+$(TARGET_PATH) \
+$(DRIVERS_HAL_PATH)/inc \
+$(DRIVERS_CUSTOM_PATH)/inc \
+$(DRIVERS_COMPONENT_PATH)/inc \
+$(LIB_PATH)/inc \
+$(CMSIS_PATH)/Device/ARTERY/AT32F4xx/inc \
+$(CMSIS_PATH)/Core/Include \
 
 AS_INCLUDES =\
 
@@ -43,21 +45,21 @@ AS_INCLUDES =\
 ######################################
 
 BOARD_SOURCES = \
-$(BOARD_PATH)/startup_at32f415cbt7.c\
-$(BOARD_PATH)/board_artery.c \
-$(BOARD_DRIVERS_PATH)/src/at32f4xx_rcc.c \
-$(SDK_DRIVERS_PATH)/src/spi_at32f4xx.c \
-$(SDK_DRIVERS_PATH)/src/dma_at32f4xx.c \
-$(SDK_DRIVERS_PATH)/src/gpio_at32f4xx.c \
-$(SDK_LIB_PATH)/src/ili9341.c \
-$(BOARD_PATH)/sample_engine.c \
+$(TARGET_PATH)/startup_at32f415cbt7.c\
+$(TARGET_PATH)/board_artery.c \
+$(DRIVERS_HAL_PATH)/src/at32f4xx_rcc.c \
+$(DRIVERS_CUSTOM_PATH)/src/spi_at32f4xx.c \
+$(DRIVERS_CUSTOM_PATH)/src/dma_at32f4xx.c \
+$(DRIVERS_CUSTOM_PATH)/src/gpio_at32f4xx.c \
+$(DRIVERS_COMPONENT_PATH)/src/ili9341.c \
+$(TARGET_PATH)/sample_engine.c \
 
 C_SOURCES = \
 $(BOARD_SOURCES) \
-$(SDK_LIB_PATH)/src/liblcd.c \
-$(SDK_LIB_PATH)/src/lib2d.c \
-$(SDK_LIB_PATH)/src/libbutton.c \
-$(SDK_LIB_PATH)/src/font.c \
+$(LIB_PATH)/src/liblcd.c \
+$(LIB_PATH)/src/lib2d.c \
+$(LIB_PATH)/src/libbutton.c \
+$(LIB_PATH)/src/font.c \
 $(APP_PATH)/control.c \
 $(APP_PATH)/tdso.c \
 $(APP_PATH)/dso.c \
@@ -69,15 +71,9 @@ $(APP_PATH)/tdso_test.c \
 # ASM sources
 #ASM_SOURCES =startup_at32f415cbt7.s
 
-#######################################
-# Misc files
-#######################################
+LDSCRIPT :=$(TARGET_PATH)/AT32F415xB_FLASH.ld
 
-# Linker script
-LDSCRIPT :=$(BOARD_PATH)/AT32F415xB_FLASH.ld
-
-# Openocd configuration
-OCD_CONFIG =$(BOARD_PATH)/at32f415.cfg
+OCD_CONFIG =$(TARGET_PATH)/at32f415.cfg
 
 #######################################
 # binaries

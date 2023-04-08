@@ -22,12 +22,12 @@ unsigned int uitime = 0;
 	DSO_Init();
 
     while(loop){    
-    	if(uitime < GetTicks()){
+    	if(uitime < GetTick()){
     	    DSO_Run(OFF);    		
     		#ifdef __EMU__
-    		uitime = GetTicks() + 10;
+    		uitime = GetTick() + 10;
     		#else
-    		uitime = GetTicks() + 5;
+    		uitime = GetTick() + 5;
     		#endif
     	}
     }

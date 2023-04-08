@@ -11,13 +11,13 @@ LIB_PATH :=$(ROOT_PATH)/lib
 INCSPATH =\
 $(LIB_PATH)/inc \
 $(APP_PATH) \
-$(TARGET_PATH) \
+$(TARGET_PATH)/Inc \
 
 CSRCS =\
-$(LIB_PATH)/src/libbutton.c \
-$(LIB_PATH)/src/lib2d.c \
-$(LIB_PATH)/src/liblcd.c \
-$(LIB_PATH)/src/font.c \
+$(SDK_LIB_PATH)/src/libbutton.c \
+$(SDK_LIB_PATH)/src/lib2d.c \
+$(SDK_LIB_PATH)/src/liblcd.c \
+$(SDK_LIB_PATH)/src/font.c \
 $(APP_PATH)/dso.c \
 $(APP_PATH)/tdso.c \
 $(APP_PATH)/control.c \
@@ -29,15 +29,15 @@ include $(TARGET_PATH)/sources.mk
 #########################################################
 # TOOLCHAIN
 #########################################################
-GCC_EXEC_PREFIX =arm-none-eabi
-GCC = $(GCC_EXEC_PREFIX)-gcc
-GPP = $(GCC_EXEC_PREFIX)-g++
-AS = $(GCC_EXEC_PREFIX)-as
-LD = $(GCC_EXEC_PREFIX)-ld
-SIZE = $(GCC_EXEC_PREFIX)-size
-OBJCOPY = $(GCC_EXEC_PREFIX)-objcopy
-OBJDUMP = $(GCC_EXEC_PREFIX)-objdump
-DBG = $(GCC_EXEC_PREFIX)-insight
+GCC_EXEC_PREFIX =arm-none-eabi-
+GCC = $(GCC_EXEC_PREFIX)gcc
+GPP = $(GCC_EXEC_PREFIX)g++
+AS = $(GCC_EXEC_PREFIX)as
+LD = $(GCC_EXEC_PREFIX)ld
+SIZE = $(GCC_EXEC_PREFIX)size
+OBJCOPY = $(GCC_EXEC_PREFIX)objcopy
+OBJDUMP = $(GCC_EXEC_PREFIX)objdump
+DBG = $(GCC_EXEC_PREFIX)insight
 JLINK =JLinkExe
 REMOVE = rm -fR
 ifndef V
@@ -48,7 +48,7 @@ endif
 ##########################################################
 
 OBJECTS =$(addprefix $(BUILD_DIR)/, $(notdir $(CSRCS:.c=.o))) $(addprefix $(BUILD_DIR)/, $(notdir $(ASRCS:.s=.o)))
-VPATH  +=$(sort $(dir $(CSRCS)))
+VPATH  +=$(sort $(dir $(CSRCS))) $(sort $(dir $(ASRCS)))
 
 all: $(EXEC).elf size
 
@@ -106,9 +106,9 @@ program: $(EXEC).elf $(TARGET).cfg
 
 
 $(BUILD_DIR)/%.o : %.c $(BUILD_DIR)
-	@echo "[CC]  $<"
+	@echo "[CC]  " $<
 	$(VERBOSE)$(GCC) $(GCFLAGS) $(addprefix -I, $(INCSPATH)) $(addprefix -D, $(GCSYMBOLS))  -c $< -o $@
 	
-$(BUILD_DIR)/%.o : %.s
-	@echo "[AS]  $<"
+$(BUILD_DIR)/%.o : %.s $(BUILD_DIR)
+	@echo "[AS]  " $<
 	$(VERBOSE)$(AS) $(ASFLAGS) $< -o $@

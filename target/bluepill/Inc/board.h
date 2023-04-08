@@ -36,7 +36,7 @@ extern "C" {
 #define SOFTPOWER_PORT GPIOA
 #define SOFTPOWER_PIN  GPIO_PIN_2
 
-#define GetTicks HAL_GetTick
+#define GetTick HAL_GetTick
 #define DelayMs(_D) HAL_Delay(_D)
 uint32_t ElapsedTicks(uint32_t start);
 
@@ -147,10 +147,7 @@ void Board_Init(void);
 uint16_t SPI_Send(uint16_t data);
 
 #define Error_Handler() _Error_Handler(__FILE__, __LINE__)
- 
-#define OFF 0
-#define ON 1 
- 
+
 #ifdef __cplusplus
 }
 #endif

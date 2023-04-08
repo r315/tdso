@@ -1,37 +1,43 @@
 #########################################################
 # project files
 #########################################################
-CSRCPATH +=bsp/bluepill/Src bsp/bluepill/startup \
-bsp/bluepill/STM32F1xx_HAL_Driver/Src \
-bsp/bluepill/STM32_USB_Device_Library/Core/Src bsp/bluepill/STM32_USB_Device_Library/Class/DFU/Src
+DRIVERS_PATH :=$(ROOT_PATH)/target/Drivers
+CMSIS_PATH  =$(DRIVERS_PATH)/CMSIS
+DRIVER_HAL_PATH =$(DRIVERS_PATH)/STM32F1xx_HAL_Driver
+DRIVER_COSTUM_PATH =$(DRIVERS_PATH)/Costum
+DRIVER_COMPONENT_PATH =$(DRIVERS_PATH)/Component
 
+INCSPATH += \
+$(DRIVER_COSTUM_PATH)/inc \
+$(CMSIS_PATH)/Core/Include \
+$(CMSIS_PATH)/Device/ST/STM32F1xx/Include \
+$(DRIVER_HAL_PATH)/Inc \
+$(DRIVER_COMPONENT_PATH)/inc
 
-INCSPATH +=bsp/bluepill/Inc \
-bsp/bluepill/STM32F1xx_HAL_Driver/Inc \
-bsp/bluepill/STM32_USB_Device_Library/Class/DFU/Inc bsp/bluepill/STM32_USB_Device_Library/Core/Inc \
-bsp/CMSIS/Device/ST/STM32F1xx/Include bsp/CMSIS/Include
-
-CSRCS +=bluepill.c \
-system_stm32f1xx.c \
-stm32f1xx_it.c \
-stm32f1xx_hal_pcd.c \
-stm32f1xx_hal_pcd_ex.c \
-stm32f1xx_hal_msp.c \
-stm32f1xx_hal_rcc.c \
-stm32f1xx_hal_gpio.c \
-stm32f1xx_hal.c \
-stm32f1xx_hal_tim.c \
-stm32f1xx_hal_rcc_ex.c \
-stm32f1xx_hal_tim_ex.c \
-stm32f1xx_hal_cortex.c \
-stm32f1xx_hal_dma.c \
-stm32f1xx_hal_adc.c \
-stm32f1xx_hal_adc_ex.c \
-stm32f1xx_hal_i2c.c \
-stm32f1xx_hal_spi.c \
-stm32f1xx_ll_usb.c \
-capture_stm32.c \
-ili9341.c\
+CSRCS += \
+$(TARGET_PATH)/Src/bluepill.c \
+$(TARGET_PATH)/Src/system_stm32f1xx.c \
+$(TARGET_PATH)/Src/stm32f1xx_it.c \
+$(DRIVER_COSTUM_PATH)/src/spi_stm32f1xx.c \
+$(DRIVER_COSTUM_PATH)/src/dma_stm32f1xx.c \
+$(DRIVER_HAL_PATH)/src/stm32f1xx_hal_pcd.c \
+$(DRIVER_HAL_PATH)/src/stm32f1xx_hal_pcd_ex.c \
+$(DRIVER_HAL_PATH)/src/stm32f1xx_hal_msp.c \
+$(DRIVER_HAL_PATH)/src/stm32f1xx_hal_rcc.c \
+$(DRIVER_HAL_PATH)/src/stm32f1xx_hal_gpio.c \
+$(DRIVER_HAL_PATH)/src/stm32f1xx_hal.c \
+$(DRIVER_HAL_PATH)/src/stm32f1xx_hal_tim.c \
+$(DRIVER_HAL_PATH)/src/stm32f1xx_hal_rcc_ex.c \
+$(DRIVER_HAL_PATH)/src/stm32f1xx_hal_tim_ex.c \
+$(DRIVER_HAL_PATH)/src/stm32f1xx_hal_cortex.c \
+$(DRIVER_HAL_PATH)/src/stm32f1xx_hal_dma.c \
+$(DRIVER_HAL_PATH)/src/stm32f1xx_hal_adc.c \
+$(DRIVER_HAL_PATH)/src/stm32f1xx_hal_adc_ex.c \
+$(DRIVER_HAL_PATH)/src/stm32f1xx_hal_i2c.c \
+$(DRIVER_HAL_PATH)/src/stm32f1xx_hal_spi.c \
+$(DRIVER_HAL_PATH)/src/stm32f1xx_ll_usb.c \
+$(DRIVER_COMPONENT_PATH)/src/ili9341.c \
+#capture_stm32.c \
 #usbd_core.c \
 #usbd_ctlreq.c \
 #usbd_ioreq.c \
@@ -41,9 +47,9 @@ ili9341.c\
 #usbd_dfu_if.c \
 #usb_device.c \
 
-ASRCS +=startup_stm32f103xb.s
+ASRCS +=$(TARGET_PATH)/startup/startup_stm32f103xb.s
 
-LDSCRIPT ="bsp/bluepill/startup/STM32F103C8Tx_FLASH.ld"
+LDSCRIPT =$(TARGET_PATH)/startup/STM32F103C8Tx_FLASH.ld
 
 DEVICE =STM32F103xB
 GCSYMBOLS +=BOARD_TDSO $(DEVICE) USE_HAL_DRIVER __weak='__attribute__((weak))' __packet='__attribute__((__packed__))'

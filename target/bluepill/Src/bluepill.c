@@ -88,6 +88,7 @@ static void MX_TIM3_Init(void);
 static void MX_ADC2_Init(void);
 
 void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
+void TDSO(void);
                                                             
 
 /* USER CODE BEGIN PFP */
@@ -99,13 +100,13 @@ void TEST_Run(void);
 
 /* USER CODE BEGIN 0 */
 uint32_t ElapsedTicks(uint32_t start_ticks){ 
-    uint32_t current = GetTicks(); 
+    uint32_t current = GetTick(); 
     return (current > start_ticks) ? current - start_ticks : 0xFFFFFFFF - start_ticks + current;
 }
 
 /* USER CODE END 0 */
 
-void Board_Init(void)
+int main(void)
 {
 
   /* USER CODE BEGIN 1 */
@@ -160,6 +161,8 @@ void Board_Init(void)
 
   ADC_Enable(&hadc2); // enable soft power button adc
 
+  TDSO();
+  return 0;
 }
 
 /**
@@ -259,7 +262,7 @@ uint16_t SPI_Send(uint16_t data){
 }
 #else
 uint16_t SPI_Send(uint16_t data){                
-  HAL_SPI_Transmit(&hspi1, &data, 1, 10);
+  return HAL_SPI_Transmit(&hspi1, (uint8_t*)&data, 1, 10);
 } 
 #endif /* BOARD_TDSO */
 
@@ -671,4 +674,13 @@ void assert_failed(uint8_t* file, uint32_t line)
   * @}
 */ 
 
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
+// Dummy stubs
+
+void CAP_Init(void){}
+void CAP_SetSampleRate(uint32_t tb_us){}
+void CAP_SetTriggerEdge(uint8_t rising){}
+uint8_t CAP_Triggered(void){ return 1;}
+uint16_t CAP_GetTriggerOffset(void){ return 0;}
+void CAP_SetTrigger(uint16_t level){}
+uint8_t CAP_IsEnded(void){ return 1;}
+void CAP_Start(int16_t *dst, uint16_t size){}

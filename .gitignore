@@ -5,8 +5,6 @@
 .vscode/
 *.jdebug
 *.jlink
-libemb/
-obj/
-test/
-Debug/
+*.axf
+*.bin
 build/

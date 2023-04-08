@@ -12,10 +12,10 @@
 #define LED_OFF LED1_OFF
 
 #define DelayMs BB_RitDelay
-#define GetTicks BB_RitTicks
+#define GetTick BB_RitTicks
 
 static inline uint32_t ElapsedTicks(uint32_t start_ticks){ 
-    uint32_t current = GetTicks(); 
+    uint32_t current = GetTick(); 
     return (current > start_ticks) ? current - start_ticks : 0xFFFFFFFF - start_ticks + current;
 }
 
