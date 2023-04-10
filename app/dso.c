@@ -53,9 +53,9 @@ Menu triggermenu = {
   .items = tmenu,
   .nitems = sizeof(tmenu)/sizeof(Menuentry),
   .fcolor = LCD_WHITE,
-  .bcolor = RGB565(8,16,8),
+  .bcolor = DSO_TRIGGER_MENU_BG,
   .sfcolor = LCD_WHITE,
-  .sbcolor = RGB565(6,18,19),
+  .sbcolor = DSO_TRIGGER_MENU_FG,
   .select = 0,
   .visible = OFF
 };
@@ -76,9 +76,9 @@ Menu mainmenu = {
   .items = fmenu,
   .nitems = sizeof(fmenu)/sizeof(Menuentry),
   .fcolor = LCD_WHITE,
-  .bcolor = RGB565(8,16,8),
+  .bcolor = DSO_TRIGGER_MENU_BG,
   .sfcolor = LCD_WHITE,
-  .sbcolor = RGB565(6,18,19),
+  .sbcolor = DSO_TRIGGER_MENU_FG,
   .select = 0,
   .visible = OFF
 };

@@ -70,13 +70,8 @@ static inline uint32_t ElapsedTicks(uint32_t start_ticks){
 
 #define LCD_PIN_INIT // handle by HAL_Init
 
-/* Led is connected on PB3 in common anode configuration */
-/* jag option must be disable to use PB3 as GPIO*/
-#define LED_Init() // Handle by HAL init
-
-#define LED GPIO_PIN_3
-#define LED_ON  GPIO_Clr(GPIOB, LED)
-#define LED_OFF GPIO_Set(GPIOB, LED)
+#define LED_ON  GPIO_Clr(LED_GPIO_Port, LED_Pin)
+#define LED_OFF GPIO_Set(LED_GPIO_Port, LED_Pin)
 
 /**
  * Analog Pins
