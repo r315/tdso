@@ -25,7 +25,17 @@ $(APP_PATH)/power.c \
 $(APP_PATH)/tdso_test.c \
 $(APP_PATH)/tdso_util.c \
 
+CPPSRCS =\
+#$(APP_PATH)/tdso_gui.cpp \
+
 include $(TARGET_PATH)/sources.mk
+
+GCSYMBOLS +=BOARD_TDSO $(DEVICE) USE_HAL_DRIVER __weak='__attribute__((weak))' __packet='__attribute__((__packed__))'
+
+#LIBS =-lgcc #-lc -lnosys
+SPECS =--specs=nosys.specs #--specs=nano.specs
+GCFLAGS =-mcpu=cortex-m3 -mthumb -mfloat-abi=soft -O0 -g3 -Wall -fmessage-length=0 -ffunction-sections
+LDFLAGS =-mcpu=cortex-m3 -mthumb -mfloat-abi=soft -Wl,--gc-sections $(SPECS)
 #########################################################
 # TOOLCHAIN
 #########################################################
@@ -38,7 +48,7 @@ SIZE = $(GCC_EXEC_PREFIX)-size
 OBJCOPY = $(GCC_EXEC_PREFIX)-objcopy
 OBJDUMP = $(GCC_EXEC_PREFIX)-objdump
 DBG = $(GCC_EXEC_PREFIX)-insight
-JLINK =JLinkExe
+JLINK =JLink
 REMOVE = rm -fR
 ifndef V
 VERBOSE =@
@@ -47,14 +57,18 @@ VERBOSE =
 endif
 ##########################################################
 
-OBJECTS =$(addprefix $(BUILD_DIR)/, $(notdir $(CSRCS:.c=.o))) $(addprefix $(BUILD_DIR)/, $(notdir $(ASRCS:.s=.o)))
+OBJECTS = \
+$(addprefix $(BUILD_DIR)/, $(notdir $(CPPSRCS:.cpp=.o))) \
+$(addprefix $(BUILD_DIR)/, $(notdir $(CSRCS:.c=.o))) \
+$(addprefix $(BUILD_DIR)/, $(notdir $(ASRCS:.s=.o)))
+
 VPATH  +=$(sort $(dir $(CSRCS)))
 
 all: $(EXEC).elf size
 
 $(EXEC).elf:  $(OBJECTS)
 	@echo "[LD]  $@"
-	$(VERBOSE)$(GCC) $(LDFLAGS) -T$(LDSCRIPT) -o "$@" $^ $(LIBS)
+	$(VERBOSE)$(GPP) $(LDFLAGS) -T$(LDSCRIPT) -o "$@" $^ $(LIBS)
 
 $(EXEC).hex: $(EXEC).elf
 	$(VERBOSE)$(OBJCOPY) -O ihex -j .text -j .data $< $@
@@ -87,12 +101,14 @@ debug:	$(EXEC).elf
 doc:
 	doxygen difs.txt
 
-$(EXEC).jlink:
+$(EXEC).jlink: $(EXEC).elf
 	@echo "Creating Jlink configuration file"
-	echo "erase\nloadbin $(TARGET).bin , 0x8000000\nr\nq" > $(TARGET).jlink
+	@echo "loadbin $< 0x0000000" > $@
+	@echo "r" >> $@
+	@echo "q" >> $@
 	
-flash: $(TARGET).jlink #tdso.bin #$(TARGET).bin
-	$(JLINK) -device $(DEVICE) -if SWD -speed auto -CommanderScript $(TARGET).jlink
+flash: $(EXEC).jlink #tdso.bin #$(TARGET).bin
+	"$(JLINK)" -device $(DEVICE) -if SWD -speed auto -CommanderScript $<
 
 $(EXEC).cfg:
 	@echo "Creating opencod configuration file"
@@ -108,6 +124,10 @@ program: $(EXEC).elf $(TARGET).cfg
 $(BUILD_DIR)/%.o : %.c $(BUILD_DIR)
 	@echo "[CC]  $<"
 	$(VERBOSE)$(GCC) $(GCFLAGS) $(addprefix -I, $(INCSPATH)) $(addprefix -D, $(GCSYMBOLS))  -c $< -o $@
+
+$(BUILD_DIR)/%.o : %.cpp $(BUILD_DIR)
+	@echo "[CC]  $<"
+	$(VERBOSE)$(GPP) $(GCFLAGS) $(addprefix -I, $(INCSPATH)) $(addprefix -D, $(GCSYMBOLS))  -c $< -o $@
 	
 $(BUILD_DIR)/%.o : %.s
 	@echo "[AS]  $<"

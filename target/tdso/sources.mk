@@ -38,14 +38,7 @@ $(DRIVER_HAL_PATH)/src/stm32f1xx_hal_adc_ex.c \
 
 CSRCS += $(HAL_SOURCES) $(BSP_SOURCES)
 LDSCRIPT ="$(TARGET_PATH)/STM32F103C8Tx_FLASH.ld"
-
 DEVICE =STM32F103xB
-GCSYMBOLS +=BOARD_TDSO $(DEVICE) USE_HAL_DRIVER __weak='__attribute__((weak))' __packet='__attribute__((__packed__))'
-#########################################################
-#Startup files and libraries
-#########################################################
-GCFLAGS =-mcpu=cortex-m3 -mthumb -mfloat-abi=soft -O0 -g3 -Wall -fmessage-length=0 -ffunction-sections
-LDFLAGS =-mcpu=cortex-m3 -mthumb -mfloat-abi=soft -Wl,--gc-sections
-#LIBS =-nostdlib -lgcc #-lc -lnosys
+
 
 
