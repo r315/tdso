@@ -1,5 +1,6 @@
 # Tiny Digital Sample Oscilloscope
 
+<img src = "doc/PXL_20230504_105309379.jpg" title="Sample engine block diagram" whidth="320" height="240">
 
 ## Specs 
 
@@ -8,7 +9,7 @@
 - Max Input: 15V
 - One channel
 - External trigger
-- 2.2" TFT screen
+- 2.2" 320x240 TFT screen
 
 ## Hardware
 
